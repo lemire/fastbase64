@@ -80,6 +80,25 @@ Except that this function will not map 0b11111100000000 to 0b1111000000000011.
 
 I think we need not only shifts but also byte shuffles.
 
+Inside Mula's scalar decoding code, we find something as follows...
+
+```
+output[0] =  input[0] | ( input[1] << 6)
+output[1] =  ( input[1] >> 2 ) | ( input[2] << 4 )
+output[2] =  ( input[3] >> 4 ) | ( input[3] << 2 )
+```
+
+... which looks very similar to the standard approach, which is as follows...
+
+
+```
+output[0] =  ( input[0] << 2 ) | ( input[1] >> 4)
+output[1] =  ( input[1] << 4 ) | ( input[2] >> 2)
+output[2] =  ( input[3] << 6 ) |  input[3]
+```
+
+... except that the byte orders of both the input and the output are reversed.
+
 ## Conclusion?
 
 Is Muła's approach with respect to gathering bits (bit packing) correct? If it is wrong, surely it can be fixed... though maybe at the cost of extra operations.
