@@ -34,23 +34,6 @@ void checkExample(const char * source, const char * coded) {
 }
 
 
-void avxtest(const char * source, const char * coded) {
-  unsigned int codedlen;
-
-  char * dest1 = (char*) malloc(modp_b64_encode_len(strlen(source)));
-  codedlen = modp_b64_encode(dest1, source, strlen(source));
-  assert(codedlen >= 0);
-  assert(strncmp(dest1,coded,codedlen) == 0);
-  assert(codedlen>=32);
-  char * recov = (char*) malloc(strlen(source) + 1);
-  int recovlen = avx_b64_decode(recov,dest1,32);
-
-  printf("%.*s", recovlen, recov);
-  assert(strncmp(recov,source,recovlen) == 0);
-
-  free(dest1);
-  free(recov);
-}
 
 int main() {
 

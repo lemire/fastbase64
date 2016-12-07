@@ -9,9 +9,11 @@
 #include <stdint.h>
 
 /**
-* "size" is the size of the input
-* should, theoretically, return the number of written bytes
+* This function converts base64 text into an array of bytes (in [0,64))
+* without support for "end of stream".
+*
+* from https://github.com/WojciechMula/base64simd
 */
-size_t avx_b64_decode(char* out, const char* input, size_t size);
+__m256i lookup_pshufb(const __m256i input);
 
 #endif
