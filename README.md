@@ -57,7 +57,7 @@ avx2_base64_decode(data,datalength,buffer,&outputlength)    	:  0.55 cycles per 
 
 Next plot shows results using random data of varying size:
 
-![results/skylake_cyclesperinputbyte.png](results/skylake_cyclesperinputbyte.png)
+<img href="https://github.com/lemire/fastbase64/blob/master/results/skylake_cyclesperinputbyte.png" width="50%" />
 
 
 ## SIMD base64 decoding
