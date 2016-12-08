@@ -16,7 +16,7 @@ We are investigating the possibility of SIMD-accelerated base64 codecs. We are m
 
 ## Results
 
-We compare the AVX2 decoder lifted from the base64 library (https://github.com/aklomp/base64) with alternative. One particularly fast decoder is used by Google Chrome (and available in Chromium). Chromium uses code produced by Nick Galbreath  called "high performance base64 encoder / decoder".
+We compare the AVX2 decoder lifted from the Base64 library (https://github.com/aklomp/base64) and derived from Muła's ideas with competitive alternatives. The main difference Muła's code and the base64 library is that the latter does an extra byte shuffle to account for the fact that base64 was designed for big-endian systems. One particularly fast decoder is used by Google Chrome (and available in Chromium). Chromium uses code produced by Nick Galbreath  called "high performance base64 encoder / decoder". We also use the decoder found in the Linux kernel as well as the one found in the QuickTime code (which was derived from code from the Apache HTTP server). We also use the 64-bit scalar decoder from the Base64 library.
 
 Let us look at real data (images and text):
 
@@ -59,8 +59,10 @@ Next plot shows results using random data of varying size:
 
 <img src="https://github.com/lemire/fastbase64/blob/master/results/skylake_cyclesperinputbyte.png" width="50%" />
 
+We see that for base64 inputs of 100 bytes or more the AVX2 decoder is much faster, being more than three times faster.
 
-## SIMD base64 decoding
+
+## How does SIMD base64 decoding works?
 
 Let us focus on decoding, the most performance-sensitive task.
 
