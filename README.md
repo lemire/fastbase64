@@ -1,5 +1,16 @@
 # fastbase64
 
+## Purpose
+
+This code is part of a *research project*.
+This is *not* a end-user library. Please don't use this code
+as-is in your projects. There are better alternatives 
+if you want to accelerate base64 decoding in actual project, e.g., see https://github.com/aklomp/base64
+
+
+## Story
+
+
 We are investigating the possibility of SIMD-accelerated base64 codecs. We are motivated by earlier work by Muła  (https://github.com/WojciechMula/base64simd). One concern is that Muła does not include unit tests that check that his code maps actual data to standard base64 outputs and back. We would like to not only derive a fast SIMD-based base64 code, but also show that it is correct using unit tests, with actual base64 examples (see https://github.com/lemire/fastbase64/blob/master/tests/unit.c). Muła's unit tests take a different form (https://github.com/WojciechMula/base64simd/blob/master/decode/verify.cpp) that may or may not prove correct base64 decoding.
 
 ## SIMD base64 decoding

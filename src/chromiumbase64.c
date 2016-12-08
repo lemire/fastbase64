@@ -302,7 +302,7 @@ static const uint32_t d3[256] = {
 #define CHARPAD '\0'
 #endif
 
-size_t modp_b64_encode(char* dest, const char* str, size_t len)
+size_t chromium_base64_encode(char* dest, const char* str, size_t len)
 {
     size_t i = 0;
     uint8_t* p = (uint8_t*) dest;
@@ -343,7 +343,7 @@ size_t modp_b64_encode(char* dest, const char* str, size_t len)
 }
 
 
-size_t modp_b64_decode(char* dest, const char* src, size_t len)
+size_t chromium_base64_decode(char* dest, const char* src, size_t len)
 {
     if (len == 0) return 0;
 
@@ -352,7 +352,9 @@ size_t modp_b64_decode(char* dest, const char* src, size_t len)
      * if padding is used, then the message must be at least
      * 4 chars and be a multiple of 4
      */
-    if (len < 4 || (len % 4 != 0)) return MODP_B64_ERROR; /* error */
+    if (len < 4 || (len % 4 != 0)) {
+      return MODP_B64_ERROR; /* error */
+    }
     /* there can be at most 2 pad chars at the end */
     if (src[len-1] == CHARPAD) {
         len--;

@@ -8,12 +8,34 @@
 #include <stddef.h>
 #include <stdint.h>
 
+
 /**
-* This function converts base64 text into an array of bytes (in [0,64))
-* without support for "end of stream".
-*
-* from https://github.com/WojciechMula/base64simd
-*/
-__m256i lookup_pshufb(const __m256i input);
+* We copy the code below from https://raw.githubusercontent.com/aklomp/base64
+**/
+
+
+/* Wrapper function to decode a plain string of given length. Output is written
+ * to *out without trailing zero. Output length in bytes is written to *outlen.
+ * The buffer in `out` has been allocated by the caller and is at least 3/4 the
+ * size of the input. */
+int avx2_base64_decode
+	( const char		*src
+	, size_t		 srclen
+	, char			*out
+	, size_t		*outlen
+	) ;
+
+
+/* Wrapper function to encode a plain string of given length. Output is written
+ * to *out without trailing zero. Output length in bytes is written to *outlen.
+ * The buffer in `out` has been allocated by the caller and is at least 4/3 the
+ * size of the input.  */
+void avx2_base64_encode
+	( const char		*src
+	, size_t		 srclen
+	, char			*out
+	, size_t		*outlen
+	) ;
+
 
 #endif

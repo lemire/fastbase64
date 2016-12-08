@@ -9,22 +9,26 @@
 
 #include "chromiumbase64.h"
 #include "avxbase64.h"
+#include "quicktimebase64.h"
+#include "linuxbase64.h"
 
-void checkExample(const char * source, const char * coded) {
+
+void chromium_checkExample(const char * source, const char * coded) {
+  printf("chromium codec check.\n");
   unsigned int len;
   unsigned int codedlen;
 
-  char * dest1 = (char*) malloc(modp_b64_encode_len(strlen(source)));
-  codedlen = modp_b64_encode(dest1, source, strlen(source));
+  char * dest1 = (char*) malloc(chromium_base64_encode_len(strlen(source)));
+  codedlen = chromium_base64_encode(dest1, source, strlen(source));
   assert(codedlen >= 0);
   assert(strncmp(dest1,coded,codedlen) == 0);
-  char *dest2 = (char*) malloc(modp_b64_decode_len(codedlen));
-  len = modp_b64_decode(dest2, coded, codedlen);
+  char *dest2 = (char*) malloc(chromium_base64_decode_len(codedlen));
+  len = chromium_base64_decode(dest2, coded, codedlen);
   assert(len >= 0);
   assert(len == strlen(source));
   assert(strncmp(dest2,source,strlen(source)) == 0);
-  char *dest3 = (char*) malloc(modp_b64_decode_len(codedlen));
-  len = modp_b64_decode(dest3, dest1, codedlen);
+  char *dest3 = (char*) malloc(chromium_base64_decode_len(codedlen));
+  len = chromium_base64_decode(dest3, dest1, codedlen);
   assert(len >= 0);
   assert(len == strlen(source));
   assert(strncmp(dest3,source,strlen(source)) == 0);
@@ -32,6 +36,85 @@ void checkExample(const char * source, const char * coded) {
   free(dest2);
   free(dest3);
 }
+
+
+
+void quicktime_checkExample(const char * source, const char * coded) {
+  printf("quicktime codec check.\n");
+  unsigned int len;
+  unsigned int codedlen;
+
+  char * dest1 = (char*) malloc(chromium_base64_encode_len(strlen(source)));
+  codedlen = quicktime_base64_encode(dest1, source, strlen(source));
+  assert(codedlen >= 0);
+  assert(strncmp(dest1,coded,codedlen) == 0);
+  char *dest2 = (char*) malloc(chromium_base64_decode_len(codedlen));
+  len = quicktime_base64_decode(dest2, coded);
+  assert(len >= 0);
+  assert(len == strlen(source));
+  assert(strncmp(dest2,source,strlen(source)) == 0);
+  char *dest3 = (char*) malloc(chromium_base64_decode_len(codedlen));
+  len = quicktime_base64_decode(dest3, dest1);
+  assert(len >= 0);
+  assert(len == strlen(source));
+  assert(strncmp(dest3,source,strlen(source)) == 0);
+  free(dest1);
+  free(dest2);
+  free(dest3);
+}
+
+
+void linux_checkExample(const char * source, const char * coded) {
+  printf("linux codec check.\n");
+  unsigned int len;
+  unsigned int codedlen;
+
+  char * dest1 = (char*) malloc(chromium_base64_encode_len(strlen(source)));
+  codedlen = chromium_base64_encode(dest1, source, strlen(source));
+  //codedlen = linux_base64_encode(dest1, source, source + strlen(source));
+  assert(codedlen >= 0);
+  assert(strncmp(dest1,coded,codedlen) == 0);
+  char *dest2 = (char*) malloc(chromium_base64_decode_len(codedlen));
+  len = linux_base64_decode(dest2, coded, coded + codedlen);
+  assert(len >= 0);
+  assert(len == strlen(source));
+  assert(strncmp(dest2,source,strlen(source)) == 0);
+  char *dest3 = (char*) malloc(chromium_base64_decode_len(codedlen));
+  len = linux_base64_decode(dest3, dest1, dest1 + codedlen);
+  assert(len >= 0);
+  assert(len == strlen(source));
+  assert(strncmp(dest3,source,strlen(source)) == 0);
+  free(dest1);
+  free(dest2);
+  free(dest3);
+}
+
+
+void avx2_checkExample(const char * source, const char * coded) {
+  printf("avx2 codec check.\n");
+  size_t len;
+  size_t codedlen;
+
+  char * dest1 = (char*) malloc(chromium_base64_encode_len(strlen(source)));
+
+  avx2_base64_encode(source, strlen(source),dest1,&codedlen);
+  assert(codedlen >= 0);
+  assert(strncmp(dest1,coded,codedlen) == 0);
+  char *dest2 = (char*) malloc(chromium_base64_decode_len(codedlen));
+  avx2_base64_decode(coded,codedlen,dest2,&len);
+  assert(len >= 0);
+  assert(len == strlen(source));
+  assert(strncmp(dest2,source,strlen(source)) == 0);
+  char *dest3 = (char*) malloc(chromium_base64_decode_len(codedlen));
+  avx2_base64_decode(dest1,codedlen,dest3,&len);
+  assert(len >= 0);
+  assert(len == strlen(source));
+  assert(strncmp(dest3,source,strlen(source)) == 0);
+  free(dest1);
+  free(dest2);
+  free(dest3);
+}
+
 
 
 
@@ -58,11 +141,22 @@ ZSBzaG9ydCB2ZWhlbWVuY2Ugb2YgYW55IGNhcm5hbCBwbGVhc3VyZS4=";
   const char * tutocoded = "VHV0b3JpYWxzUG9pbnQ/amF2YTg=";
 
 
-  checkExample(wikipediasource,wikipediacoded);
-  checkExample(gosource,gocoded);
-  checkExample(tutosource,tutocoded);
+  chromium_checkExample(wikipediasource,wikipediacoded);
+  chromium_checkExample(gosource,gocoded);
+  chromium_checkExample(tutosource,tutocoded);
 
-  avxtest(wikipediasource,wikipediacoded);
+  avx2_checkExample(wikipediasource,wikipediacoded);
+  avx2_checkExample(gosource,gocoded);
+  avx2_checkExample(tutosource,tutocoded);
+
+
+  quicktime_checkExample(wikipediasource,wikipediacoded);
+  quicktime_checkExample(gosource,gocoded);
+  quicktime_checkExample(tutosource,tutocoded);
+
+  linux_checkExample(wikipediasource,wikipediacoded);
+  linux_checkExample(gosource,gocoded);
+  linux_checkExample(tutosource,tutocoded);
 
 
 	printf("Code looks ok.\n");
