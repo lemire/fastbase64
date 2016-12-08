@@ -14,9 +14,9 @@ all: unit basic_benchmark
 
 
 HEADERS=./include/chromiumbase64.h \
-        ./include/avxbase64.h ./include/quicktimebase64.h
+        ./include/avxbase64.h ./include/quicktimebase64.h ./include/scalarbase64.h
 
-OBJECTS= chromiumbase64.o avxbase64.o quicktimebase64.o
+OBJECTS= chromiumbase64.o avxbase64.o quicktimebase64.o scalarbase64.o 
 
 
 %.o: ./src/%.c $(HEADERS)
