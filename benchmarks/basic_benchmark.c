@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
   for(int k = 0; k < N; ++k) randombuffer[k] = rand();
   printf("displaying cycles per input bytes for linux, quicktime, chromium, scalar and avx2 decoders, first column is number of bytes\n");
 
-  for(int l = 8; l <= N; ++l) {
+  for(int l = 8; l <= N; l += 4) {
     printf("%d ",l);
     char * code = (char*) malloc(chromium_base64_encode_len(l));
     int codedlen = chromium_base64_encode(code, randombuffer, l);
