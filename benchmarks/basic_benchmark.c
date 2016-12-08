@@ -60,7 +60,6 @@ int main(int argc, char **argv) {
     printf("\n");
 
   }
-  // can be plotted : plot "shit.txt" using 1:2 ti "linux" w l, "" using 1:3 ti "quicktime" w l, "" using 1:4 ti "chromium" w l, "" using 1:5 ti "scalar" w l, "" using 1:6 ti "avx2" w l
 
 
   printf("Testing with real data.\n");
