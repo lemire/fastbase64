@@ -22,16 +22,13 @@ void chromium_checkExample(const char * source, const char * coded) {
 
   char * dest1 = (char*) malloc(chromium_base64_encode_len(strlen(source)));
   codedlen = chromium_base64_encode(dest1, source, strlen(source));
-  assert(codedlen >= 0);
   assert(strncmp(dest1,coded,codedlen) == 0);
   char *dest2 = (char*) malloc(chromium_base64_decode_len(codedlen));
   len = chromium_base64_decode(dest2, coded, codedlen);
-  assert(len >= 0);
   assert(len == strlen(source));
   assert(strncmp(dest2,source,strlen(source)) == 0);
   char *dest3 = (char*) malloc(chromium_base64_decode_len(codedlen));
   len = chromium_base64_decode(dest3, dest1, codedlen);
-  assert(len >= 0);
   assert(len == strlen(source));
   assert(strncmp(dest3,source,strlen(source)) == 0);
   free(dest1);
@@ -48,16 +45,13 @@ void quicktime_checkExample(const char * source, const char * coded) {
 
   char * dest1 = (char*) malloc(chromium_base64_encode_len(strlen(source)));
   codedlen = quicktime_base64_encode(dest1, source, strlen(source));
-  assert(codedlen >= 0);
   assert(strncmp(dest1,coded,codedlen) == 0);
   char *dest2 = (char*) malloc(chromium_base64_decode_len(codedlen));
   len = quicktime_base64_decode(dest2, coded);
-  assert(len >= 0);
   assert(len == strlen(source));
   assert(strncmp(dest2,source,strlen(source)) == 0);
   char *dest3 = (char*) malloc(chromium_base64_decode_len(codedlen));
   len = quicktime_base64_decode(dest3, dest1);
-  assert(len >= 0);
   assert(len == strlen(source));
   assert(strncmp(dest3,source,strlen(source)) == 0);
   free(dest1);
@@ -74,16 +68,13 @@ void linux_checkExample(const char * source, const char * coded) {
   char * dest1 = (char*) malloc(chromium_base64_encode_len(strlen(source)));
   codedlen = chromium_base64_encode(dest1, source, strlen(source));
   //codedlen = linux_base64_encode(dest1, source, source + strlen(source));
-  assert(codedlen >= 0);
   assert(strncmp(dest1,coded,codedlen) == 0);
   char *dest2 = (char*) malloc(chromium_base64_decode_len(codedlen));
   len = linux_base64_decode(dest2, coded, coded + codedlen);
-  assert(len >= 0);
   assert(len == strlen(source));
   assert(strncmp(dest2,source,strlen(source)) == 0);
   char *dest3 = (char*) malloc(chromium_base64_decode_len(codedlen));
   len = linux_base64_decode(dest3, dest1, dest1 + codedlen);
-  assert(len >= 0);
   assert(len == strlen(source));
   assert(strncmp(dest3,source,strlen(source)) == 0);
   free(dest1);
@@ -100,16 +91,13 @@ void avx2_checkExample(const char * source, const char * coded) {
   char * dest1 = (char*) malloc(chromium_base64_encode_len(strlen(source)));
 
   avx2_base64_encode(source, strlen(source),dest1,&codedlen);
-  assert(codedlen >= 0);
   assert(strncmp(dest1,coded,codedlen) == 0);
   char *dest2 = (char*) malloc(chromium_base64_decode_len(codedlen));
   avx2_base64_decode(coded,codedlen,dest2,&len);
-  assert(len >= 0);
   assert(len == strlen(source));
   assert(strncmp(dest2,source,strlen(source)) == 0);
   char *dest3 = (char*) malloc(chromium_base64_decode_len(codedlen));
   avx2_base64_decode(dest1,codedlen,dest3,&len);
-  assert(len >= 0);
   assert(len == strlen(source));
   assert(strncmp(dest3,source,strlen(source)) == 0);
   free(dest1);
@@ -127,16 +115,13 @@ void scalar_checkExample(const char * source, const char * coded) {
   char * dest1 = (char*) malloc(chromium_base64_encode_len(strlen(source)));
 
   scalar_base64_encode(source, strlen(source),dest1,&codedlen);
-  assert(codedlen >= 0);
   assert(strncmp(dest1,coded,codedlen) == 0);
   char *dest2 = (char*) malloc(chromium_base64_decode_len(codedlen));
   scalar_base64_decode(coded,codedlen,dest2,&len);
-  assert(len >= 0);
   assert(len == strlen(source));
   assert(strncmp(dest2,source,strlen(source)) == 0);
   char *dest3 = (char*) malloc(chromium_base64_decode_len(codedlen));
   scalar_base64_decode(dest1,codedlen,dest3,&len);
-  assert(len >= 0);
   assert(len == strlen(source));
   assert(strncmp(dest3,source,strlen(source)) == 0);
   free(dest1);
