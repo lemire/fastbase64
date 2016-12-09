@@ -7,7 +7,7 @@ CFLAGS= -fPIC -std=c99 -Wall -Wextra -Wshadow
 ifeq ($(DEBUG),1)
 CFLAGS += -ggdb -fsanitize=undefined  -fno-omit-frame-pointer -fsanitize=address
 else
-CFLAGS += -O3 -funroll-loops -march=native
+CFLAGS += -O3 -march=native
 endif # debug
 
 all: unit basic_benchmark

@@ -42,7 +42,8 @@ void testdecode(const char * data, size_t datalength, bool verbose) {
   if(verbose) printf("\n");
 }
 
-int main(int argc, char **argv) {
+int main() {
+//int main(int argc, char **argv) {
   RDTSC_SET_OVERHEAD(rdtsc_overhead_func(1), repeat);
 
   printf("Testing first with random data.\n");
