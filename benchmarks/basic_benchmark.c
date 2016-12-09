@@ -11,6 +11,7 @@
 #include "moby_dick.h"
 
 #include "avxbase64.h"
+#include "experimentalavxbase64.h"
 #include "scalarbase64.h"
 #include "chromiumbase64.h"
 #include "quicktimebase64.h"
@@ -37,6 +38,7 @@ void testdecode(const char * data, size_t datalength, bool verbose) {
   assert(outputlength == expected);
   BEST_TIME(scalar_base64_decode(data,datalength,buffer,&outputlength), avxexpected, , repeat, datalength,verbose);
   BEST_TIME(avx2_base64_decode(data,datalength,buffer,&outputlength), avxexpected, , repeat, datalength,verbose);
+  BEST_TIME(expavx2_base64_decode(data,datalength,buffer,&outputlength), avxexpected, , repeat, datalength,verbose);
 
   free(buffer);
   if(verbose) printf("\n");

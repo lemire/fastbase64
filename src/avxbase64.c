@@ -244,7 +244,7 @@ static inline __m256i dec_reshuffle(__m256i in) {
       out, _mm256_setr_epi32(0, 1, 2, 4, 5, 6, -1, -1));
 }
 
-void base64_stream_encode_avx2(struct base64_state *state, const char *src,
+static void base64_stream_encode_avx2(struct base64_state *state, const char *src,
                                size_t srclen, char *out, size_t *outlen) {
   // Assume that *out is large enough to contain the output.
   // Theoretically it should be 4/3 the length of src.
@@ -322,7 +322,7 @@ void base64_stream_encode_avx2(struct base64_state *state, const char *src,
   *outlen = outl;
 }
 
-int base64_stream_decode_avx2(struct base64_state *state, const char *src,
+static int base64_stream_decode_avx2(struct base64_state *state, const char *src,
                               size_t srclen, char *out, size_t *outlen) {
   int ret = 0;
   const uint8_t *c = (const uint8_t *)src;
