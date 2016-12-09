@@ -70,7 +70,7 @@ Let us focus on decoding, the most performance-sensitive task.
 
 Base64 writes 6-bit bytes in text form, not as byte values in [0,64). It is useful to take the text input and convert it to values in [0,64) if we want to decode base64 text. (This is not a necessary step however: some high performance base64 decoders do not include such a separate step, decoding base64 in one pass instead.) Muła calls this a lookup, possibly because it is commonly solved using a lookup table.
 
-Muła showed (https://github.com/WojciechMula/base64simd) that you could quickly take a 32-byte vector of base64 encoded text and convert it to an array of integers in [0,64) using shifts, bitwise logical operations and shuffles. It is fast, but the caveat is that it does not do error checking and end-of-stream processing.
+Muła showed (https://github.com/WojciechMula/base64simd) that you could quickly take a 32-byte vector of base64 encoded text and convert it to an array of integers in [0,64) using shifts, bitwise logical operations and shuffles. It is fast.
 
 ### Bit packing
 
