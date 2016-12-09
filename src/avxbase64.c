@@ -6,7 +6,9 @@
 * We copy the code below from https://raw.githubusercontent.com/aklomp/base64
 * We specialize it for AVX2, our intended target.
 **/
-
+/**
+* Note : Hardware such as Knights Landing might do poorly with this AVX2 code since it relies on shuffles. Alternatives might be faster.
+*/
 
 static const uint8_t base64_table_enc[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                                    "abcdefghijklmnopqrstuvwxyz"
