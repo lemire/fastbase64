@@ -103,22 +103,18 @@ static inline __m256i enc_translate(const __m256i in) {
 }
 
 static inline __m256i dec_reshuffle(__m256i in) {
-  // Mask in a single byte per shift:
-  const __m256i maskB2 = _mm256_set1_epi32(0x003F0000);
-  const __m256i maskB1 = _mm256_set1_epi32(0x00003F00);
-  // Pack bytes together:
-  __m256i out = _mm256_srli_epi32(in, 16);
-  out =
-      _mm256_or_si256(out, _mm256_srli_epi32(_mm256_and_si256(in, maskB2), 2));
-  out =
-      _mm256_or_si256(out, _mm256_slli_epi32(_mm256_and_si256(in, maskB1), 12));
-  out = _mm256_or_si256(out, _mm256_slli_epi32(in, 26));
+
+  // inlined procedure pack_madd from https://github.com/WojciechMula/base64simd/blob/master/decode/pack.avx2.cpp
+  const __m256i merge_ab_and_bc = _mm256_maddubs_epi16(in, _mm256_set1_epi32(0x40014001));
+  __m256i out = _mm256_madd_epi16(merge_ab_and_bc, _mm256_set1_epi32(0x10000001));
+  // end of inlined
+
   // Pack bytes together within 32-bit words, discarding words 3 and 7:
-  out = _mm256_shuffle_epi8(out, _mm256_setr_epi8(3, 2, 1, 7, 6, 5, 11, 10, 9,
-                                                  15, 14, 13, -1, -1, -1, -1, 3,
-                                                  2, 1, 7, 6, 5, 11, 10, 9, 15,
-                                                  14, 13, -1, -1, -1, -1));
-  // Pack 32-bit words together, squashing empty words 3 and 7:
+  out = _mm256_shuffle_epi8(out, _mm256_setr_epi8(
+        2, 1, 0, 6, 5, 4, 10, 9, 8, 14, 13, 12, -1, -1, -1, -1,
+        2, 1, 0, 6, 5, 4, 10, 9, 8, 14, 13, 12, -1, -1, -1, -1
+  ));
+
   return _mm256_permutevar8x32_epi32(
       out, _mm256_setr_epi32(0, 1, 2, 4, 5, 6, -1, -1));
 }
@@ -252,7 +248,7 @@ static int base64_stream_decode_avx2(struct base64_state *state, const char *src
         //  5  [97..122]  [26..51]  -71  a..z
         // (6) Everything else => invalid input
 
-        __m256i str = _mm256_loadu_si256((__m256i *)c);
+        __m256i str = _mm256_bswap_epi32(_mm256_loadu_si256((__m256i *)c));
         c += 32;
 
         // inlined function lookup_pshufb from https://github.com/WojciechMula/base64simd/blob/master/decode/lookup.avx2.cpp
