@@ -1,7 +1,6 @@
 # use basic_benchmark to generate skylake.txt
 
 load "linespointsstyle.gnuplot"
-
 set style line 81 lt 0  # dashed
 set style line 81 lt rgb "#808080"  # grey
 set grid back linestyle 81
@@ -10,6 +9,8 @@ set term pdfcairo fontscale 0.75
 set xlabel "input bytes"
 set ylabel "CPU cycle per input byte"
 
+stats 'skylake.txt' using 1
+set xrange [STATS_min:STATS_max]
 
 set key top right
 
