@@ -9,6 +9,7 @@
 #include "benchmark.h"
 #include "images_base64.h"
 #include "moby_dick.h"
+#include "webexamples.h"
 
 #include "avxbase64.h"
 #include "experimentalavxbase64.h"
@@ -77,6 +78,9 @@ int main() {
   testdecode(mandrilbase64, sizeof(mandrilbase64) - 1,true);
   printf("moby_dick [text]\n");
   testdecode(moby_dick_base64, sizeof(moby_dick_base64) - 1,true);
-
+  printf("google logo [png]\n");
+  testdecode(googlelogo_base64, sizeof(googlelogo_base64) - 1,true);
+  printf("bing.com social icons [png]\n");
+  testdecode(bingsocialicon_base64, sizeof(bingsocialicon_base64) - 1,true);
   return 0;
 }
