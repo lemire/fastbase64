@@ -2,7 +2,6 @@
 
 load "linespointsstyle.gnuplot"
 
-set xrange[8:1024]
 set style line 81 lt 0  # dashed
 set style line 81 lt rgb "#808080"  # grey
 set grid back linestyle 81
