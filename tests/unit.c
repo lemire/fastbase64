@@ -10,6 +10,7 @@
 #include "chromiumbase64.h"
 #include "avxbase64.h"
 #include "experimentalavxbase64.h"
+#include "experimental2avxbase64.h"
 
 #include "scalarbase64.h"
 
@@ -37,7 +38,6 @@ void chromium_checkExample(const char * source, const char * coded) {
   free(dest2);
   free(dest3);
 }
-
 
 
 void quicktime_checkExample(const char * source, const char * coded) {
@@ -108,7 +108,6 @@ void avx2_checkExample(const char * source, const char * coded) {
 }
 
 
-
 void expavx2_checkExample(const char * source, const char * coded) {
   printf("experimentalavx2 codec check.\n");
   size_t len;
@@ -130,6 +129,31 @@ void expavx2_checkExample(const char * source, const char * coded) {
   free(dest2);
   free(dest3);
 }
+
+
+void exp2avx2_checkExample(const char * source, const char * coded) {
+  printf("experimental2avx2 codec check.\n");
+  size_t len;
+  size_t codedlen;
+
+  char * dest1 = (char*) malloc(chromium_base64_encode_len(strlen(source)));
+
+  exp2avx2_base64_encode(source, strlen(source),dest1,&codedlen);
+  assert(strncmp(dest1,coded,codedlen) == 0);
+  char *dest2 = (char*) malloc(chromium_base64_decode_len(codedlen));
+  exp2avx2_base64_decode(coded,codedlen,dest2,&len);
+  assert(len == strlen(source));
+  assert(strncmp(dest2,source,strlen(source)) == 0);
+  char *dest3 = (char*) malloc(chromium_base64_decode_len(codedlen));
+  exp2avx2_base64_decode(dest1,codedlen,dest3,&len);
+  assert(len == strlen(source));
+  assert(strncmp(dest3,source,strlen(source)) == 0);
+  free(dest1);
+  free(dest2);
+  free(dest3);
+}
+
+
 void scalar_checkExample(const char * source, const char * coded) {
   printf("scalar codec check.\n");
   size_t len;
@@ -189,6 +213,10 @@ ZSBzaG9ydCB2ZWhlbWVuY2Ugb2YgYW55IGNhcm5hbCBwbGVhc3VyZS4=";
   expavx2_checkExample(wikipediasource,wikipediacoded);
   expavx2_checkExample(gosource,gocoded);
   expavx2_checkExample(tutosource,tutocoded);
+
+  exp2avx2_checkExample(wikipediasource,wikipediacoded);
+  exp2avx2_checkExample(gosource,gocoded);
+  exp2avx2_checkExample(tutosource,tutocoded);
 
   scalar_checkExample(wikipediasource,wikipediacoded);
   scalar_checkExample(gosource,gocoded);
