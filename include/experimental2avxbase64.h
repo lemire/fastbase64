@@ -1,5 +1,5 @@
-#ifndef EXPAVX_B64
-#define EXPAVX_B64
+#ifndef EXP2AVX_B64
+#define EXP2AVX_B64
 
 /**
 * Assumes recent x64 hardware with AVX2 instructions.
