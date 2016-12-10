@@ -51,12 +51,12 @@ int main() {
   RDTSC_SET_OVERHEAD(rdtsc_overhead_func(1), repeat);
 
   printf("Testing first with random data.\n");
-  const int N = 1024;
+  const int N = 2048;
   char randombuffer[N];
   for(int k = 0; k < N; ++k) randombuffer[k] = rand();
   printf("displaying cycles per input bytes for linux, quicktime, chromium, scalar and avx2 decoders, first column is number of bytes\n");
 
-  for(int l = 8; l <= N; l += 4) {
+  for(int l = 32; l <= N; l += 8) {
     printf("%d ",l);
     char * code = (char*) malloc(chromium_base64_encode_len(l));
     int codedlen = chromium_base64_encode(code, randombuffer, l);
