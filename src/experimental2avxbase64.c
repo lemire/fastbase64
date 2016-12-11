@@ -105,8 +105,11 @@ static inline __m256i enc_translate(const __m256i in) {
 static inline __m256i dec_reshuffle(__m256i in) {
 
   // inlined procedure pack_madd from https://github.com/WojciechMula/base64simd/blob/master/decode/pack.avx2.cpp
-  const __m256i merge_ab_and_bc = _mm256_maddubs_epi16(in, _mm256_set1_epi32(0x40014001));
-  __m256i out = _mm256_madd_epi16(merge_ab_and_bc, _mm256_set1_epi32(0x10000001));
+  // The only difference is that elements are reversed,
+  // only the multiplication constants were changed.
+
+  const __m256i merge_ab_and_bc = _mm256_maddubs_epi16(in, _mm256_set1_epi32(0x01400140));
+  __m256i out = _mm256_madd_epi16(merge_ab_and_bc, _mm256_set1_epi32(0x00011000));
   // end of inlined
 
   // Pack bytes together within 32-bit words, discarding words 3 and 7:
@@ -248,7 +251,7 @@ static int base64_stream_decode_avx2(struct base64_state *state, const char *src
         //  5  [97..122]  [26..51]  -71  a..z
         // (6) Everything else => invalid input
 
-        __m256i str = _mm256_bswap_epi32(_mm256_loadu_si256((__m256i *)c));
+        __m256i str = _mm256_loadu_si256((__m256i *)c);
         c += 32;
 
         // inlined function lookup_pshufb from https://github.com/WojciechMula/base64simd/blob/master/decode/lookup.avx2.cpp
