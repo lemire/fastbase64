@@ -14,16 +14,7 @@
 **/
 
 
-/* Wrapper function to decode a plain string of given length. Output is written
- * to *out without trailing zero. Output length in bytes is written to *outlen.
- * The buffer in `out` has been allocated by the caller and is at least 3/4 the
- * size of the input. */
-int expavx2_base64_decode
-	( const char		*src
-	, size_t		 srclen
-	, char			*out
-	, size_t		*outlen
-	) ;
+size_t expavx2_base64_decode(char *out, const char *src, size_t srclen);
 
 
 /* Wrapper function to encode a plain string of given length. Output is written

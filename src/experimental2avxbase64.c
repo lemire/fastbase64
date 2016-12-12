@@ -237,7 +237,6 @@ static int base64_stream_decode_avx2(struct base64_state *state, const char *src
       // the
       // gap. 32 + 2 + 11 = 45 bytes:
       while (srclen >= 45) {
-        srclen -= 32;
 
         // The input consists of six character sets in the Base64 alphabet,
         // which we need to map back to the 6-bit values they represent.
@@ -252,7 +251,6 @@ static int base64_stream_decode_avx2(struct base64_state *state, const char *src
         // (6) Everything else => invalid input
 
         __m256i str = _mm256_loadu_si256((__m256i *)c);
-        c += 32;
 
         // inlined function lookup_pshufb from https://github.com/WojciechMula/base64simd/blob/master/decode/lookup.avx2.cpp
         // description http://0x80.pl/notesen/2016-01-17-sse-base64-decoding.html#vector-lookup-pshufb-update
@@ -310,6 +308,8 @@ static int base64_stream_decode_avx2(struct base64_state *state, const char *src
         if (_mm256_movemask_epi8(outside)) {
             break;
         }
+        srclen -= 32;
+        c += 32;
 
         const __m256i shift  = _mm256_shuffle_epi8(shift_LUT, higher_nibble);
         const __m256i t0     = _mm256_add_epi8(str, shift);

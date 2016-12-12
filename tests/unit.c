@@ -115,20 +115,21 @@ void expavx2_checkExample(const char * source, const char * coded) {
 
   char * dest1 = (char*) malloc(chromium_base64_encode_len(strlen(source)));
 
-  expavx2_base64_encode(source, strlen(source),dest1,&codedlen);
+  avx2_base64_encode(source, strlen(source),dest1,&codedlen);
   assert(strncmp(dest1,coded,codedlen) == 0);
   char *dest2 = (char*) malloc(chromium_base64_decode_len(codedlen));
-  expavx2_base64_decode(coded,codedlen,dest2,&len);
+  len = expavx2_base64_decode(dest2, coded, codedlen);
   assert(len == strlen(source));
   assert(strncmp(dest2,source,strlen(source)) == 0);
   char *dest3 = (char*) malloc(chromium_base64_decode_len(codedlen));
-  expavx2_base64_decode(dest1,codedlen,dest3,&len);
+  len = expavx2_base64_decode(dest3, dest1, codedlen);
   assert(len == strlen(source));
   assert(strncmp(dest3,source,strlen(source)) == 0);
   free(dest1);
   free(dest2);
   free(dest3);
 }
+
 
 
 void exp2avx2_checkExample(const char * source, const char * coded) {
@@ -152,6 +153,7 @@ void exp2avx2_checkExample(const char * source, const char * coded) {
   free(dest2);
   free(dest3);
 }
+
 
 
 void scalar_checkExample(const char * source, const char * coded) {

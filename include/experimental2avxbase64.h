@@ -10,14 +10,19 @@
 
 
 /**
-* We copy the code below from https://raw.githubusercontent.com/aklomp/base64
+* Part of this code is based on Alfred Klomp's https://github.com/aklomp/base64 (published under BSD)
 **/
 
 
 /* Wrapper function to decode a plain string of given length. Output is written
  * to *out without trailing zero. Output length in bytes is written to *outlen.
  * The buffer in `out` has been allocated by the caller and is at least 3/4 the
- * size of the input. */
+ * size of the input.
+ *
+ * Returns a non-zero value on error:
+ * 1: end-of-stream while waiting for the last '=' character
+ * 2: invalid input
+ */
 int exp2avx2_base64_decode
 	( const char		*src
 	, size_t		 srclen
