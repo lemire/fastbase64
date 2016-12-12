@@ -16,13 +16,13 @@ set key top right
 
 set out "skylake_cyclesperinputbyte.pdf"
 
-plot "skylake.txt" using 1:2 ti "Linux" w l ls 1, "" using 1:3 ti "Apple QuickTime" w l  ls 2, "" using 1:4 ti "Google Chrome" w l ls 3, "" using 1:5 ti "scalar" w l  ls 4, "" using 1:8 ti "AVX2" w l  ls 6
+plot "skylake.txt" using 1:2 ti "Linux" w l ls 1, "" using 1:3 ti "Apple QuickTime" w l  ls 2, "" using 1:4 ti "Google Chrome" w l ls 3, "" using 1:5 ti "scalar" w l  ls 4, "" using 1:7 ti "AVX2" w l  ls 6, "" using 1:8 ti "AVX2-Mula" w l  ls 7,  "" using 1:6 ti "AVX2-Kompf" w l  ls 8
 
 
 set ylabel "CPU cycles / AVX2 cycles"
 set out "skylake_ratio_cyclesperinputbyte.pdf"
 
-plot "skylake.txt" using 1:($4/$8) notitle w l ls 8
+plot "skylake.txt" using 1:($4/$7) notitle w l ls 8
 
 
 
@@ -33,4 +33,4 @@ set ylabel "CPU cycle per input byte"
 
 
 
-plot "skylake.txt" using 1:2 ti "Linux" w l ls 1, "" using 1:3 ti "Apple QuickTime" w l  ls 2, "" using 1:4 ti "Google Chrome" w l ls 3, "" using 1:5 ti "scalar" w l  ls 4, "" using 1:8 ti "AVX2" w l  ls 6
+plot "skylake.txt" using 1:2 ti "Linux" w l ls 1, "" using 1:3 ti "Apple QuickTime" w l  ls 2, "" using 1:4 ti "Google Chrome" w l ls 3, "" using 1:5 ti "scalar" w l  ls 4,"" using 1:7 ti "AVX2" w l  ls 6, "" using 1:8 ti "AVX2-Mula" w l  ls 7,  "" using 1:6 ti "AVX2-Kompf" w l  ls 8
