@@ -132,7 +132,7 @@ exp2avx2_base64_decode(data,datalength,buffer,&outputlength)	:  0.28 cycles per 
 
 Next plot shows results using random data of varying size:
 
-<img src="https://github.com/lemire/fastbase64/blob/master/results/skylake_cyclesperinputbyte.png" width="50%" />
+<img src="https://github.com/lemire/fastbase64/blob/master/results/skylake_decoding_cyclesperinputbyte.png" width="50%" />
 
 We see that for base64 inputs of 100 bytes or more the AVX2 decoder is much faster, being more than three times faster.
 
