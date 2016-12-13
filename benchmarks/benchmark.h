@@ -92,13 +92,45 @@ uint64_t global_rdtsc_overhead = (uint64_t) UINT64_MAX;
             fflush(NULL);                                                 \
  } while (0)
 
-// like BEST_TIME except that we run a function to check the result
-#define BEST_TIME_CHECK(test, check, pre, repeat, size)                         \
+// like BEST_TIME, but no check
+#define BEST_TIME_NOCHECK(test, pre, repeat, size, verbose)                         \
         do {                                                              \
             if (global_rdtsc_overhead == UINT64_MAX) {                    \
                RDTSC_SET_OVERHEAD(rdtsc_overhead_func(1), repeat);        \
             }                                                             \
-            printf("%-60s\t: ", #test);                                        \
+            if(verbose) printf("%-60s\t: ", #test);                                        \
+            fflush(NULL);                                                 \
+            uint64_t cycles_start, cycles_final, cycles_diff;             \
+            uint64_t min_diff = (uint64_t)-1;                             \
+            uint64_t sum_diff = 0;                                        \
+            for (int i = 0; i < repeat; i++) {                            \
+                pre;                                                      \
+                __asm volatile("" ::: /* pretend to clobber */ "memory"); \
+                RDTSC_START(cycles_start);                                \
+                test;                     \
+                RDTSC_STOP(cycles_final);                                \
+                cycles_diff = (cycles_final - cycles_start - global_rdtsc_overhead);           \
+                if (cycles_diff < min_diff) min_diff = cycles_diff;       \
+                sum_diff += cycles_diff;                                  \
+            }                                                             \
+            uint64_t S = size;                                            \
+            float cycle_per_op = (min_diff) / (double)S;                  \
+            float avg_cycle_per_op = (sum_diff) / ((double)S * repeat);   \
+            if(verbose) printf(" %.2f cycles per operation (best) ", cycle_per_op);   \
+            if(verbose) printf("\t%.2f cycles per operation (avg) ", avg_cycle_per_op);   \
+            if(verbose) printf("\n");                                                 \
+            if(!verbose) printf(" %.2f ",cycle_per_op);                   \
+            fflush(NULL);                                                 \
+ } while (0)
+
+
+// like BEST_TIME except that we run a function to check the result
+#define BEST_TIME_CHECK(test, check, pre, repeat, size, verbose)                         \
+        do {                                                              \
+            if (global_rdtsc_overhead == UINT64_MAX) {                    \
+               RDTSC_SET_OVERHEAD(rdtsc_overhead_func(1), repeat);        \
+            }                                                             \
+            if(verbose) printf("%-60s\t: ", #test);                                        \
             fflush(NULL);                                                 \
             uint64_t cycles_start, cycles_final, cycles_diff;             \
             uint64_t min_diff = (uint64_t)-1;                             \
@@ -117,9 +149,10 @@ uint64_t global_rdtsc_overhead = (uint64_t) UINT64_MAX;
             uint64_t S = size;                                            \
             float cycle_per_op = (min_diff) / (double)S;                  \
             float avg_cycle_per_op = (sum_diff) / ((double)S * repeat);   \
-            printf(" %.2f cycles per operation (best) ", cycle_per_op);   \
-            printf("\t%.2f cycles per operation (avg) ", avg_cycle_per_op);   \
-            printf("\n");                                                 \
+            if(verbose) printf(" %.2f cycles per operation (best) ", cycle_per_op);   \
+            if(verbose) printf("\t%.2f cycles per operation (avg) ", avg_cycle_per_op);   \
+            if(verbose) printf("\n");                                                 \
+            if(!verbose) printf(" %.2f ",cycle_per_op);                   \
             fflush(NULL);                                                 \
  } while (0)
 

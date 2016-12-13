@@ -21,6 +21,27 @@
 
 static const int repeat = 5;
 
+
+void testencode(const char * data, size_t datalength, bool verbose) {
+  if(verbose) printf("encode a base64 input of  %zu bytes, ",datalength);
+  char * buffer = malloc(datalength * 2); // we allocate plenty of memory
+  size_t expected =   chromium_base64_encode(buffer, data,  datalength);
+  if(verbose) printf("encoded size = %zu \n",expected);
+  BEST_TIME_NOCHECK(linux_base64_encode(buffer, data, data + datalength),  , repeat, datalength,verbose);
+  BEST_TIME_NOCHECK(quicktime_base64_encode(buffer, data,datalength),  , repeat, datalength,verbose);
+  BEST_TIME(chromium_base64_encode(buffer, data, datalength), (int) expected, , repeat, datalength,verbose);
+  size_t outputlength;
+  avx2_base64_encode(data,datalength,buffer,&outputlength);
+  size_t avxexpected =  outputlength;
+  assert(outputlength == expected);
+  BEST_TIME_CHECK(scalar_base64_encode(data,datalength,buffer,&outputlength),(outputlength == avxexpected), , repeat, datalength,verbose);
+  BEST_TIME_CHECK(expavx2_base64_encode(buffer, data, datalength), (int) expected, , repeat, datalength,verbose);
+  BEST_TIME_CHECK(exp2avx2_base64_encode(data,datalength,buffer,&outputlength),  (outputlength == avxexpected), , repeat,  datalength,verbose);
+  free(buffer);
+  if(verbose) printf("\n");
+}
+
+
 void testdecode(const char * data, size_t datalength, bool verbose) {
   if(verbose) printf("decoding a base64 input of  %zu bytes, ",datalength);
   if (datalength < 4 || (datalength % 4 != 0)) {
@@ -42,7 +63,6 @@ void testdecode(const char * data, size_t datalength, bool verbose) {
   BEST_TIME(avx2_base64_decode(data,datalength,buffer,&outputlength), avxexpected, , repeat, datalength,verbose);
   BEST_TIME(expavx2_base64_decode(buffer, data, datalength), (int) expected, , repeat, datalength,verbose);
 
-  //BEST_TIME(expavx2_base64_decode(data,datalength,buffer,&outputlength), avxexpected, , repeat, datalength,verbose);
   BEST_TIME(exp2avx2_base64_decode(data,datalength,buffer,&outputlength), avxexpected, , repeat, datalength,verbose);
 
   free(buffer);
@@ -57,7 +77,12 @@ int main() {
   const int N = 2048;
   char randombuffer[N];
   for(int k = 0; k < N; ++k) randombuffer[k] = rand();
-  printf("displaying cycles per input bytes for linux, quicktime, chromium, scalar and avx2 decoders, first column is number of bytes\n");
+  const char * decodingfilename = "decodingperf.txt";
+  const char * encodingfilename = "encodingperf.txt";
+  printf("See files %s %s ... \n", encodingfilename,decodingfilename);
+  freopen(decodingfilename,"w",stdout);
+
+  printf("#displaying cycles per input bytes for linux, quicktime, chromium, scalar and avx2 decoders, first column is number of bytes\n");
 
   for(int l = 32; l <= N; l += 8) {
     printf("%d ",l);
@@ -69,6 +94,14 @@ int main() {
 
   }
 
+  freopen(encodingfilename,"w",stdout);
+  printf("#displaying cycles per input bytes for linux, quicktime, chromium, scalar and avx2 encoders, first column is number of bytes\n");
+  for(int l = 32; l <= N; l += 8) {
+    printf("%d ",l);
+    testencode(randombuffer, l, false);
+    printf("\n");
+  }
+  freopen("/dev/tty","w",stdout);
 
   printf("Testing with real data.\n");
 

@@ -1,70 +1,21 @@
-#include "avxbase64.h"
-#include "chromiumbase64.h"
+#include "experimentalavxbase64.h"
 
 #include <x86intrin.h>
 
-// end-of-file definitions
-// Almost end-of-file when waiting for the last '=' character:
-#define BASE64_AEOF 1
-// End-of-file when stream end has been reached or invalid input provided:
-#define BASE64_EOF 2
+/**
+* This code borrows from Wojciech Mula's library at
+* https://github.com/WojciechMula/base64simd (published under BSD)
+* as well as code from Alfred Klomp's library https://github.com/aklomp/base64 (published under BSD)
+*
+*/
+
+
+
+
 /**
 * Note : Hardware such as Knights Landing might do poorly with this AVX2 code since it relies on shuffles. Alternatives might be faster.
 */
 
-static const uint8_t base64_table_enc[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                                   "abcdefghijklmnopqrstuvwxyz"
-                                   "0123456789+/";
-// In the lookup table below, note that the value for '=' (character 61) is
-// 254, not 255. This character is used for in-band signaling of the end of
-// the datastream, and we will use that later. The characters A-Z, a-z, 0-9
-// and + / are mapped to their "decoded" values. The other bytes all map to
-// the value 255, which flags them as "invalid input".
-
-static
-const uint8_t base64_table_dec[] = {
-    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-    255, 255,
-    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-    255, 255,
-    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 62, 255, 255,
-    255, 63,
-    52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 255, 255, 255, 254,
-    255, 255,
-    255, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
-    13, 14,
-    15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 255, 255, 255,
-    255, 255,
-    255, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38,
-    39, 40,
-    41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 255, 255, 255,
-    255, 255,
-    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-    255, 255,
-    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-};
-
-
-
-struct base64_state {
- int eof;
- int bytes;
- unsigned char carry;
-};
-
-struct codec {
-  void (*enc)(struct base64_state *state, const char *src, size_t srclen,
-              char *out, size_t *outlen);
-  int (*dec)(struct base64_state *state, const char *src, size_t srclen,
-             char *out, size_t *outlen);
-};
 
 static inline __m256i _mm256_bswap_epi32(const __m256i in) {
   // _mm256_shuffle_epi8() works on two 128-bit lanes separately:
@@ -123,129 +74,25 @@ static inline __m256i dec_reshuffle(__m256i in) {
       out, _mm256_setr_epi32(0, 1, 2, 4, 5, 6, -1, -1));
 }
 
-static void base64_stream_encode_avx2(struct base64_state *state, const char *src,
-                               size_t srclen, char *out, size_t *outlen) {
-  // Assume that *out is large enough to contain the output.
-  // it should be 4/3 the length of src.
-  const uint8_t *c = (const uint8_t *)src;
-  uint8_t *o = (uint8_t *)out;
-  size_t outl = 0;
-  struct base64_state st;
-  st.bytes = state->bytes;
-  st.carry = state->carry;
 
-  // Turn three bytes into four 6-bit numbers:
-  // in[0] = 00111111
-  // in[1] = 00112222
-  // in[2] = 00222233
-  // in[3] = 00333333
-
-  // Duff's device, a for() loop inside a switch() statement.
-  switch (st.bytes) {
-    for (;;) {
-    case 0:
-              // If we have AVX2 support, pick off 24 bytes at a time for as long as we
-              // can.
-              // But because we read 32 bytes at a time, ensure we have enough room to
-              // do a
-              // full 32-byte read without segfaulting:
-
-      while (srclen >= 32) {
-                // Load string:
-
-        __m256i str = _mm256_loadu_si256((__m256i *)c);
+size_t expavx2_base64_encode(char* dest, const char* str, size_t len) {
+      size_t outlen  = 0;
+      while (len >= 32) {
+        // Load string:
+        __m256i inputvector = _mm256_loadu_si256((__m256i *)str);
         // Reshuffle:
-        str = enc_reshuffle(str);
+        inputvector = enc_reshuffle(inputvector);
         // Translate reshuffled bytes to the Base64 alphabet:
-        str = enc_translate(str);
-        _mm256_storeu_si256((__m256i *)o, str);
-        c += 24;
-        o += 32;
-        outl += 32;
-        srclen -= 24;
+        inputvector = enc_translate(inputvector);
+        _mm256_storeu_si256((__m256i *)dest, inputvector);
+        str += 24;
+        dest += 32;
+        outlen += 32;
+        len -= 24;
       }
-      if (srclen-- == 0) {
-        break;
-      }
-      *o++ = base64_table_enc[*c >> 2];
-      st.carry = (*c++ << 4) & 0x30;
-      st.bytes++;
-      outl += 1;
-
-    case 1:
-      if (srclen-- == 0) {
-        break;
-      }
-      *o++ = base64_table_enc[st.carry | (*c >> 4)];
-      st.carry = (*c++ << 2) & 0x3C;
-      st.bytes++;
-      outl += 1;
-
-    case 2:
-      if (srclen-- == 0) {
-        break;
-      }
-      *o++ = base64_table_enc[st.carry | (*c >> 6)];
-      *o++ = base64_table_enc[*c++ & 0x3F];
-      st.bytes = 0;
-      outl += 2;
-    }
-  }
-  state->bytes = st.bytes;
-  state->carry = st.carry;
-  *outlen = outl;
-}
-
-
-static void base64_stream_encode_init(struct base64_state *state) {
-  state->eof = 0;
-  state->bytes = 0;
-  state->carry = 0;
-}
-
-static void base64_stream_encode(struct base64_state *state, const char *src,
-                          size_t srclen, char *out, size_t *outlen) {
-  base64_stream_encode_avx2(state, src, srclen, out, outlen);
-}
-
-static void base64_stream_encode_final(struct base64_state *state, char *out,
-                                size_t *outlen) {
-  uint8_t *o = (uint8_t *)out;
-  if (state->bytes == 1) {
-    *o++ = base64_table_enc[state->carry];
-    *o++ = '=';
-    *o++ = '=';
-    *outlen = 3;
-    return;
-  }
-  if (state->bytes == 2) {
-    *o++ = base64_table_enc[state->carry];
-    *o++ = '=';
-    *outlen = 2;
-    return;
-  }
-  *outlen = 0;
-}
-
-static void base64_stream_decode_init(struct base64_state *state) {
-  state->eof = 0;
-  state->bytes = 0;
-  state->carry = 0;
-}
-
-static int base64_stream_decode(struct base64_state *state, const char *src,
-                         size_t srclen, char *out, size_t *outlen) {
-  return base64_stream_decode_avx2(state, src, srclen, out, outlen);
-}
-
-void expavx2_base64_encode(const char *src, size_t srclen, char *out, size_t *outlen) {
-  size_t s;
-  size_t t;
-  struct base64_state state;
-  base64_stream_encode_init(&state);
-  base64_stream_encode(&state, src, srclen, out, &s);
-  base64_stream_encode_final(&state, out + s, &t);
-  *outlen = s + t;
+      size_t scalarret = chromium_base64_encode(dest, str, len);
+      if(scalarret == MODP_B64_ERROR) return MODP_B64_ERROR;
+      return outlen + scalarret;
 }
 
 size_t expavx2_base64_decode(char *out, const char *src, size_t srclen) {

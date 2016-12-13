@@ -69,7 +69,6 @@ void linux_checkExample(const char * source, const char * coded) {
 
   char * dest1 = (char*) malloc(chromium_base64_encode_len(strlen(source)));
   codedlen = chromium_base64_encode(dest1, source, strlen(source));
-  //codedlen = linux_base64_encode(dest1, source, source + strlen(source));
   assert(strncmp(dest1,coded,codedlen) == 0);
   char *dest2 = (char*) malloc(chromium_base64_decode_len(codedlen));
   len = linux_base64_decode(dest2, coded, coded + codedlen);
@@ -114,8 +113,7 @@ void expavx2_checkExample(const char * source, const char * coded) {
   size_t codedlen;
 
   char * dest1 = (char*) malloc(chromium_base64_encode_len(strlen(source)));
-
-  avx2_base64_encode(source, strlen(source),dest1,&codedlen);
+  codedlen = expavx2_base64_encode(dest1, source, strlen(source));
   assert(strncmp(dest1,coded,codedlen) == 0);
   char *dest2 = (char*) malloc(chromium_base64_decode_len(codedlen));
   len = expavx2_base64_decode(dest2, coded, codedlen);

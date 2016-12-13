@@ -1,22 +1,65 @@
 # fastbase64
 
-## Purpose
-
-This code is part of a *research project*.
-This is *not* a end-user library. Please don't use this code
-as-is in your projects. There are better alternatives
-if you want to accelerate base64 decoding in actual project.
-
 
 ## Story
 
+We are investigating the possibility of SIMD-accelerated base64 codecs.
 
-We are investigating the possibility of SIMD-accelerated base64 codecs. We are motivated by earlier work by Muła  (https://github.com/WojciechMula/base64simd). This work was later used in a production-ready library (https://github.com/aklomp/base64).
+## Sample usage
+
+
+We extend's Nick Galbreath's base64 library (this high-performance library is used in Chromium).
+
+We assume that you have an AVX2-capable machine (recent Intel processor from 2013 and up). In practice,
+which function is called should be determined based on the underlying hardware.
+
+### Encoding
+
+Original encoding...
+```
+ char* src = ...;
+ int srclen = ...; //the length of number of bytes in src
+ char* dest = (char*) malloc(chromium_base64_decode_len(srclen)); // decode_len effectively multiplies by 4/3
+ int len = chromium_base64_encode(dest, src, sourcelen); // returns how many bytes were decoded.
+```
+Encoding with AVX2...
+```
+ char* src = ...;
+ int srclen = ...; //the length of number of bytes in src
+ char* dest = (char*) malloc(chromium_base64_decode_len(srclen));
+ int len = expavx2_base64_encode(dest, src, sourcelen); // returns how many bytes were decoded.
+```
+
+### Decoding
+
+Original decoding...
+```
+char* src = ...;
+int srclen = ...; // or if you don't know use strlen(src)
+char* dest = (char*) malloc(chromium_base64_encode_len(srclen)); // effectively multiplies by 3/4
+int len = chromium_base64_decode(dest, src, sourcelen);
+if (len == MODP_B64_ERROR) { error }
+```
+
+
+
+Decoding with AVX2...
+
+```
+char* src = ...;
+int srclen = ...; // or if you don't know use strlen(src)
+char* dest = (char*) malloc(chromium_base64_encode_len(srclen)); // effectively multiplies by 3/4
+int len = expavx2_base64_decode(dest, src, sourcelen);
+if (len == MODP_B64_ERROR) { error }
+```
+
+
+
 
 
 ## Results
 
-We compare the AVX2 decoder lifted from the Base64 library (https://github.com/aklomp/base64) and derived from Muła's ideas with competitive alternatives. The main difference Muła's code and the base64 library is that the latter does an extra byte shuffle to account for the fact that base64 was designed for big-endian systems. One particularly fast decoder is used by Google Chrome (and available in Chromium). Chromium uses code produced by Nick Galbreath  called "high performance base64 encoder / decoder". We also use the decoder found in the Linux kernel as well as the one found in the QuickTime code (which was derived from code from the Apache HTTP server). We also use the 64-bit scalar decoder from the Base64 library.
+We compare SIMD decoding with competitive alternatives.  One particularly fast decoder is used by Google Chrome (and available in Chromium). Chromium uses code produced by Nick Galbreath  called "high performance base64 encoder / decoder". We also use the decoder found in the Linux kernel as well as the one found in the QuickTime code (which was derived from code from the Apache HTTP server). 
 
 Let us look at real data (images and text):
 

@@ -7,26 +7,25 @@
 
 #include <stddef.h>
 #include <stdint.h>
-
+#include "chromiumbase64.h"
 
 /**
-* We copy the code below from https://raw.githubusercontent.com/aklomp/base64
-**/
+* This code extends Nick Galbreath's high performance base 64decoder (used in Chromium), the API is the
+* same effectively, see chromium64.h.
+*/
 
-
+/*
+* AVX2 accelerated version of Galbreath's chromium_base64_decode function
+* Usage remains the same, see chromium.h.
+*/
 size_t expavx2_base64_decode(char *out, const char *src, size_t srclen);
 
+/*
+* AVX2 accelerated version of Galbreath's chromium_base64_encode function
+* Usage remains the same, see chromium.h.
+*/
+size_t expavx2_base64_encode(char* dest, const char* str, size_t len);
 
-/* Wrapper function to encode a plain string of given length. Output is written
- * to *out without trailing zero. Output length in bytes is written to *outlen.
- * The buffer in `out` has been allocated by the caller and is at least 4/3 the
- * size of the input.  */
-void expavx2_base64_encode
-	( const char		*src
-	, size_t		 srclen
-	, char			*out
-	, size_t		*outlen
-	) ;
 
 
 #endif
