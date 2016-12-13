@@ -17,13 +17,11 @@ HEADERS=./include/chromiumbase64.h \
         ./include/avxbase64.h \
         ./include/quicktimebase64.h \
         ./include/scalarbase64.h \
-        ./include/experimentalavxbase64.h \
-        ./include/experimental2avxbase64.h
+        ./include/experimentalavxbase64.h
 
 OBJECTS=chromiumbase64.o \
         avxbase64.o \
         experimentalavxbase64.o \
-        experimental2avxbase64.o \
         quicktimebase64.o \
         scalarbase64.o 
 

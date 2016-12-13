@@ -35,3 +35,6 @@
 # Executables
 unit
 basic_benchmark
+
+# Other
+*perf.txt
