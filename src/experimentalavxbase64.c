@@ -25,22 +25,32 @@ static inline __m256i _mm256_bswap_epi32(const __m256i in) {
                                                   9, 8, 15, 14, 13, 12));
 }
 
-static inline __m256i enc_reshuffle(__m256i in) {
+static inline __m256i enc_reshuffle(const __m256i input) {
 
-  in = _mm256_permutevar8x32_epi32(in,
-                                   _mm256_setr_epi32(0, 1, 2, -1, 3, 4, 5, -1));
-  in = _mm256_shuffle_epi8(in,
-                           _mm256_set_epi8(-1, 9, 10, 11, -1, 6, 7, 8, -1, 3, 4,
-                                           5, -1, 0, 1, 2, -1, 9, 10, 11, -1, 6,
-                                           7, 8, -1, 3, 4, 5, -1, 0, 1, 2));
+    const __m256i tmp = _mm256_permutevar8x32_epi32(input, _mm256_setr_epi32(
+        0, 1, 2, -1, 3, 4, 5, -1));
 
-  const __m256i merged = _mm256_blend_epi16(_mm256_slli_epi32(in, 4), in, 0x55);
+    // translation from SSE into AVX2 of procedure
+    // https://github.com/WojciechMula/base64simd/blob/master/encode/unpack_bigendian.cpp
+    const __m256i in = _mm256_shuffle_epi8(tmp, _mm256_set_epi8(
+        10, 11, 9, 10,
+         7,  8, 6,  7,
+         4,  5, 3,  4,
+         1,  2, 0,  1,
 
-  const __m256i bd = _mm256_and_si256(merged, _mm256_set1_epi32(0x003F003F));
-  const __m256i ac = _mm256_and_si256(_mm256_slli_epi32(merged, 2),
-                                      _mm256_set1_epi32(0x3F003F00));
-  const __m256i indices = _mm256_or_si256(ac, bd);
-  return _mm256_bswap_epi32(indices);
+        10, 11, 9, 10,
+         7,  8, 6,  7,
+         4,  5, 3,  4,
+         1,  2, 0,  1
+    ));
+
+    const __m256i t0 = _mm256_and_si256(in, _mm256_set1_epi32(0x0fc0fc00));
+    const __m256i t1 = _mm256_mulhi_epu16(t0, _mm256_set1_epi32(0x04000040));
+
+    const __m256i t2 = _mm256_and_si256(in, _mm256_set1_epi32(0x003f03f0));
+    const __m256i t3 = _mm256_mullo_epi16(t2, _mm256_set1_epi32(0x01000010));
+
+    return _mm256_or_si256(t1, t3);
 }
 
 static inline __m256i enc_translate(const __m256i in) {
