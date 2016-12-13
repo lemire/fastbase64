@@ -84,7 +84,7 @@ int main() {
 
   printf("#displaying cycles per input bytes for linux, quicktime, chromium, scalar and avx2 decoders, first column is number of bytes\n");
 
-  for(int l = 32; l <= N; l += 8) {
+  for(int l = 8; l <= N; l ++) {
     printf("%d ",l);
     char * code = (char*) malloc(chromium_base64_encode_len(l));
     int codedlen = chromium_base64_encode(code, randombuffer, l);
@@ -96,7 +96,7 @@ int main() {
 
   freopen(encodingfilename,"w",stdout);
   printf("#displaying cycles per input bytes for linux, quicktime, chromium, scalar and avx2 encoders, first column is number of bytes\n");
-  for(int l = 32; l <= N; l += 8) {
+  for(int l = 8; l <= N; l ++) {
     printf("%d ",l);
     testencode(randombuffer, l, false);
     printf("\n");
