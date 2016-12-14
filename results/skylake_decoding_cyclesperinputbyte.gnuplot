@@ -3,7 +3,7 @@ set style line 81 lt 0  # dashed
 set style line 81 lt rgb "#808080"  # grey
 set grid back linestyle 81
 set xlabel "input bytes"
-set ylabel "CPU cycle per input byte"
+set ylabel "CPU cycles per input byte"
 
 stats 'skylake.txt' using 1
 set xrange [STATS_min:STATS_max]

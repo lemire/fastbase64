@@ -18,7 +18,7 @@
 #include "quicktimebase64.h"
 #include "linuxbase64.h"
 
-static const int repeat = 5;
+static const int repeat = 50;
 
 
 void testencode(const char * data, size_t datalength, bool verbose) {
