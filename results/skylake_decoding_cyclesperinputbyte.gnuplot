@@ -15,7 +15,4 @@ set key top right
 plot "skylake.txt" using 1:2 ti "Linux" w l ls 1, \
      "" using 1:3 ti "Apple QuickTime" w l  ls 2, \
      "" using 1:4 ti "Google Chrome" w l ls 3, \
-     "" using 1:5 ti "scalar" w l  ls 4, \
-     "" using 1:7 ti "AVX2" w l  ls 6, \
-     "" using 1:8 ti "AVX2-Mula" w l  ls 7, \
-     "" using 1:6 ti "AVX2-Kompf" w l  ls 8
+     "" using 1:7 ti "AVX2" w l  ls 6

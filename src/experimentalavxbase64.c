@@ -68,7 +68,7 @@ static inline __m256i dec_reshuffle(__m256i in) {
   // The only difference is that elements are reversed,
   // only the multiplication constants were changed.
 
-  const __m256i merge_ab_and_bc = _mm256_maddubs_epi16(in, _mm256_set1_epi32(0x01400140));
+  const __m256i merge_ab_and_bc = _mm256_maddubs_epi16(in, _mm256_set1_epi32(0x01400140)); //_mm256_maddubs_epi16 is likely expensive
   __m256i out = _mm256_madd_epi16(merge_ab_and_bc, _mm256_set1_epi32(0x00011000));
   // end of inlined
 
@@ -77,7 +77,7 @@ static inline __m256i dec_reshuffle(__m256i in) {
         2, 1, 0, 6, 5, 4, 10, 9, 8, 14, 13, 12, -1, -1, -1, -1,
         2, 1, 0, 6, 5, 4, 10, 9, 8, 14, 13, 12, -1, -1, -1, -1
   ));
-
+  // the call to _mm256_permutevar8x32_epi32 could be replaced by a call to _mm256_storeu2_m128i but it is doubtful that it would help
   return _mm256_permutevar8x32_epi32(
       out, _mm256_setr_epi32(0, 1, 2, 4, 5, 6, -1, -1));
 }
