@@ -1,6 +1,7 @@
 #include "experimentalavxbase64.h"
 
 #include <x86intrin.h>
+#include <stdbool.h>
 
 /**
 * This code borrows from Wojciech Mula's library at
@@ -83,6 +84,46 @@ static inline __m256i dec_reshuffle(__m256i in) {
 
 
 size_t expavx2_base64_encode(char* dest, const char* str, size_t len) {
+      const char* const dest_orig = dest;
+      if(len >= 32 - 4) {
+        // first load is masked
+        __m256i inputvector = _mm256_maskload_epi32((int const*)(str - 4),  _mm256_set_epi32(
+            0x80000000,
+            0x80000000,
+            0x80000000,
+            0x80000000,
+
+            0x80000000,
+            0x80000000,
+            0x80000000,
+            0x00000000 // we do not load the first 4 bytes
+        ));
+        //////////
+        // Intel docs: Faults occur only due to mask-bit required memory accesses that caused the faults.
+        // Faults will not occur due to referencing any memory location if the corresponding mask bit for
+        //that memory location is 0. For example, no faults will be detected if the mask bits are all zero.
+        ////////////
+        while(true) {
+          inputvector = enc_reshuffle(inputvector);
+          inputvector = enc_translate(inputvector);
+          _mm256_storeu_si256((__m256i *)dest, inputvector);
+          str += 24;
+          dest += 32;
+          len -= 24;
+          if(len >= 32) {
+            inputvector = _mm256_loadu_si256((__m256i *)(str - 4)); // no need for a mask here
+            // we could do a mask load as long as len >= 24
+          } else {
+            break;
+          }
+        }
+      }
+      size_t scalarret = chromium_base64_encode(dest, str, len);
+      if(scalarret == MODP_B64_ERROR) return MODP_B64_ERROR;
+      return (dest - dest_orig) + scalarret;
+}
+
+size_t old_expavx2_base64_encode(char* dest, const char* str, size_t len) {
       char* dest_orig = dest;
       if (len >= 6) {
         chromium_base64_encode(dest, str, 6); // TODO: inline
