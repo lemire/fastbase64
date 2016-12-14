@@ -111,7 +111,7 @@ size_t expavx2_base64_encode(char* dest, const char* str, size_t len) {
 }
 
 size_t expavx2_base64_decode(char *out, const char *src, size_t srclen) {
-      size_t outlen  = 0;
+      char* out_orig = out;
       while (srclen >= 45) {
 
         // The input consists of six character sets in the Base64 alphabet,
@@ -196,9 +196,8 @@ size_t expavx2_base64_decode(char *out, const char *src, size_t srclen) {
         str = dec_reshuffle(str);
         _mm256_storeu_si256((__m256i *)out, str);
         out += 24;
-        outlen += 24;
       }
       size_t scalarret = chromium_base64_decode(out, src, srclen);
       if(scalarret == MODP_B64_ERROR) return MODP_B64_ERROR;
-      return outlen + scalarret;
+      return (out - out_orig) + scalarret;
 }
