@@ -65,63 +65,63 @@ Let us look at real data (images and text):
 
 ```
 $ ./basic_benchmark
-rdtsc_overhead set to 32
+rdtsc_overhead set to 30
 Testing first with random data.
 See files encodingperf.txt decodingperf.txt ...
 Testing with real data.
 lena [jpg]
 decoding a base64 input of  141020 bytes, original size = 105764
-linux_base64_decode(buffer, data, data + datalength)        	:  19.90 cycles per operation (best) 	20.03 cycles per operation (avg)
-quicktime_base64_decode(buffer, data)                       	:  3.10 cycles per operation (best) 	3.14 cycles per operation (avg)
-chromium_base64_decode(buffer, data, datalength)            	:  1.84 cycles per operation (best) 	1.84 cycles per operation (avg)
-scalar_base64_decode(data,datalength,buffer,&outputlength)  	:  2.03 cycles per operation (best) 	2.05 cycles per operation (avg)
-avx2_base64_decode(data,datalength,buffer,&outputlength)    	:  0.42 cycles per operation (best) 	0.42 cycles per operation (avg)
-expavx2_base64_decode(buffer, data, datalength)             	:  0.26 cycles per operation (best) 	0.26 cycles per operation (avg)
+linux_base64_decode(buffer, data, data + datalength)            :  19.88 cycles per operation (best)     20.07 cycles per operation (avg)
+quicktime_base64_decode(buffer, data)                           :  3.11 cycles per operation (best)     3.17 cycles per operation (avg)
+chromium_base64_decode(buffer, data, datalength)                :  1.84 cycles per operation (best)     1.84 cycles per operation (avg)
+scalar_base64_decode(data,datalength,buffer,&outputlength)      :  2.04 cycles per operation (best)     2.06 cycles per operation (avg)
+avx2_base64_decode(data,datalength,buffer,&outputlength)        :  0.42 cycles per operation (best)     0.43 cycles per operation (avg)
+expavx2_base64_decode(buffer, data, datalength)                 :  0.25 cycles per operation (best)     0.25 cycles per operation (avg)
 
 peppers [jpg]
 decoding a base64 input of  12640 bytes, original size = 9478
-linux_base64_decode(buffer, data, data + datalength)        	:  17.55 cycles per operation (best) 	18.65 cycles per operation (avg)
-quicktime_base64_decode(buffer, data)                       	:  3.11 cycles per operation (best) 	3.15 cycles per operation (avg)
-chromium_base64_decode(buffer, data, datalength)            	:  1.82 cycles per operation (best) 	1.83 cycles per operation (avg)
-scalar_base64_decode(data,datalength,buffer,&outputlength)  	:  2.04 cycles per operation (best) 	2.06 cycles per operation (avg)
-avx2_base64_decode(data,datalength,buffer,&outputlength)    	:  0.43 cycles per operation (best) 	0.44 cycles per operation (avg)
-expavx2_base64_decode(buffer, data, datalength)             	:  0.26 cycles per operation (best) 	0.27 cycles per operation (avg)
+linux_base64_decode(buffer, data, data + datalength)            :  15.17 cycles per operation (best)     16.07 cycles per operation (avg)
+quicktime_base64_decode(buffer, data)                           :  3.14 cycles per operation (best)     3.18 cycles per operation (avg)
+chromium_base64_decode(buffer, data, datalength)                :  1.83 cycles per operation (best)     1.84 cycles per operation (avg)
+scalar_base64_decode(data,datalength,buffer,&outputlength)      :  2.03 cycles per operation (best)     2.06 cycles per operation (avg)
+avx2_base64_decode(data,datalength,buffer,&outputlength)        :  0.43 cycles per operation (best)     0.43 cycles per operation (avg)
+expavx2_base64_decode(buffer, data, datalength)                 :  0.25 cycles per operation (best)     0.25 cycles per operation (avg)
 
 mandril [jpg]
 decoding a base64 input of  329632 bytes, original size = 247222
-linux_base64_decode(buffer, data, data + datalength)        	:  20.22 cycles per operation (best) 	20.25 cycles per operation (avg)
-quicktime_base64_decode(buffer, data)                       	:  3.10 cycles per operation (best) 	3.13 cycles per operation (avg)
-chromium_base64_decode(buffer, data, datalength)            	:  1.84 cycles per operation (best) 	1.84 cycles per operation (avg)
-scalar_base64_decode(data,datalength,buffer,&outputlength)  	:  2.04 cycles per operation (best) 	2.05 cycles per operation (avg)
-avx2_base64_decode(data,datalength,buffer,&outputlength)    	:  0.42 cycles per operation (best) 	0.45 cycles per operation (avg)
-expavx2_base64_decode(buffer, data, datalength)             	:  0.26 cycles per operation (best) 	0.26 cycles per operation (avg)
+linux_base64_decode(buffer, data, data + datalength)            :  20.17 cycles per operation (best)     20.27 cycles per operation (avg)
+quicktime_base64_decode(buffer, data)                           :  3.10 cycles per operation (best)     3.16 cycles per operation (avg)
+chromium_base64_decode(buffer, data, datalength)                :  1.84 cycles per operation (best)     1.84 cycles per operation (avg)
+scalar_base64_decode(data,datalength,buffer,&outputlength)      :  2.03 cycles per operation (best)     2.06 cycles per operation (avg)
+avx2_base64_decode(data,datalength,buffer,&outputlength)        :  0.42 cycles per operation (best)     0.42 cycles per operation (avg)
+expavx2_base64_decode(buffer, data, datalength)                 :  0.25 cycles per operation (best)     0.25 cycles per operation (avg)
 
 moby_dick [text]
 decoding a base64 input of  1484 bytes, original size = 1111
-linux_base64_decode(buffer, data, data + datalength)        	:  5.16 cycles per operation (best) 	9.25 cycles per operation (avg)
-quicktime_base64_decode(buffer, data)                       	:  3.21 cycles per operation (best) 	3.22 cycles per operation (avg)
-chromium_base64_decode(buffer, data, datalength)            	:  1.83 cycles per operation (best) 	1.84 cycles per operation (avg)
-scalar_base64_decode(data,datalength,buffer,&outputlength)  	:  2.07 cycles per operation (best) 	2.10 cycles per operation (avg)
-avx2_base64_decode(data,datalength,buffer,&outputlength)    	:  0.53 cycles per operation (best) 	0.58 cycles per operation (avg)
-expavx2_base64_decode(buffer, data, datalength)             	:  0.32 cycles per operation (best) 	0.37 cycles per operation (avg)
+linux_base64_decode(buffer, data, data + datalength)            :  3.62 cycles per operation (best)     4.36 cycles per operation (avg)
+quicktime_base64_decode(buffer, data)                           :  3.14 cycles per operation (best)     3.21 cycles per operation (avg)
+chromium_base64_decode(buffer, data, datalength)                :  1.82 cycles per operation (best)     1.84 cycles per operation (avg)
+scalar_base64_decode(data,datalength,buffer,&outputlength)      :  2.06 cycles per operation (best)     2.11 cycles per operation (avg)
+avx2_base64_decode(data,datalength,buffer,&outputlength)        :  0.52 cycles per operation (best)     0.53 cycles per operation (avg)
+expavx2_base64_decode(buffer, data, datalength)                 :  0.31 cycles per operation (best)     0.32 cycles per operation (avg)
 
 google logo [png]
 decoding a base64 input of  3144 bytes, original size = 2357
-linux_base64_decode(buffer, data, data + datalength)        	:  10.19 cycles per operation (best) 	14.25 cycles per operation (avg)
-quicktime_base64_decode(buffer, data)                       	:  3.12 cycles per operation (best) 	3.17 cycles per operation (avg)
-chromium_base64_decode(buffer, data, datalength)            	:  1.82 cycles per operation (best) 	1.83 cycles per operation (avg)
-scalar_base64_decode(data,datalength,buffer,&outputlength)  	:  2.05 cycles per operation (best) 	2.07 cycles per operation (avg)
-avx2_base64_decode(data,datalength,buffer,&outputlength)    	:  0.47 cycles per operation (best) 	0.49 cycles per operation (avg)
-expavx2_base64_decode(buffer, data, datalength)             	:  0.28 cycles per operation (best) 	0.30 cycles per operation (avg)
+linux_base64_decode(buffer, data, data + datalength)            :  3.99 cycles per operation (best)     5.94 cycles per operation (avg)
+quicktime_base64_decode(buffer, data)                           :  3.15 cycles per operation (best)     3.18 cycles per operation (avg)
+chromium_base64_decode(buffer, data, datalength)                :  1.81 cycles per operation (best)     1.83 cycles per operation (avg)
+scalar_base64_decode(data,datalength,buffer,&outputlength)      :  2.04 cycles per operation (best)     2.05 cycles per operation (avg)
+avx2_base64_decode(data,datalength,buffer,&outputlength)        :  0.46 cycles per operation (best)     0.46 cycles per operation (avg)
+expavx2_base64_decode(buffer, data, datalength)                 :  0.27 cycles per operation (best)     0.29 cycles per operation (avg)
 
 bing.com social icons [png]
 decoding a base64 input of  1808 bytes, original size = 1355
-linux_base64_decode(buffer, data, data + datalength)        	:  8.77 cycles per operation (best) 	12.98 cycles per operation (avg)
-quicktime_base64_decode(buffer, data)                       	:  3.18 cycles per operation (best) 	3.20 cycles per operation (avg)
-chromium_base64_decode(buffer, data, datalength)            	:  1.82 cycles per operation (best) 	1.83 cycles per operation (avg)
-scalar_base64_decode(data,datalength,buffer,&outputlength)  	:  2.05 cycles per operation (best) 	2.08 cycles per operation (avg)
-avx2_base64_decode(data,datalength,buffer,&outputlength)    	:  0.45 cycles per operation (best) 	0.49 cycles per operation (avg)
-expavx2_base64_decode(buffer, data, datalength)             	:  0.29 cycles per operation (best) 	0.32 cycles per operation (avg)
+linux_base64_decode(buffer, data, data + datalength)            :  3.73 cycles per operation (best)     4.79 cycles per operation (avg)
+quicktime_base64_decode(buffer, data)                           :  3.16 cycles per operation (best)     3.20 cycles per operation (avg)
+chromium_base64_decode(buffer, data, datalength)                :  1.83 cycles per operation (best)     1.84 cycles per operation (avg)
+scalar_base64_decode(data,datalength,buffer,&outputlength)      :  2.05 cycles per operation (best)     2.08 cycles per operation (avg)
+avx2_base64_decode(data,datalength,buffer,&outputlength)        :  0.45 cycles per operation (best)     0.46 cycles per operation (avg)
+expavx2_base64_decode(buffer, data, datalength)                 :  0.27 cycles per operation (best)     0.28 cycles per operation (avg)
 ```
 
 Next plot shows results using random data of varying size:
