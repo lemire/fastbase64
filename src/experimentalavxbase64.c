@@ -27,21 +27,18 @@ static inline __m256i _mm256_bswap_epi32(const __m256i in) {
 
 static inline __m256i enc_reshuffle(const __m256i input) {
 
-    const __m256i tmp = _mm256_permutevar8x32_epi32(input, _mm256_setr_epi32(
-        0, 1, 2, -1, 3, 4, 5, -1));
-
     // translation from SSE into AVX2 of procedure
     // https://github.com/WojciechMula/base64simd/blob/master/encode/unpack_bigendian.cpp
-    const __m256i in = _mm256_shuffle_epi8(tmp, _mm256_set_epi8(
-        10, 11, 9, 10,
-         7,  8, 6,  7,
-         4,  5, 3,  4,
-         1,  2, 0,  1,
+    const __m256i in = _mm256_shuffle_epi8(input, _mm256_set_epi8(
+        10, 11,  9, 10,
+         7,  8,  6,  7,
+         4,  5,  3,  4,
+         1,  2,  0,  1,
 
-        10, 11, 9, 10,
-         7,  8, 6,  7,
-         4,  5, 3,  4,
-         1,  2, 0,  1
+        14, 15, 13, 14,
+        11, 12, 10, 11,
+         8,  9,  7,  8,
+         5,  6,  4,  5
     ));
 
     const __m256i t0 = _mm256_and_si256(in, _mm256_set1_epi32(0x0fc0fc00));
@@ -87,9 +84,17 @@ static inline __m256i dec_reshuffle(__m256i in) {
 
 size_t expavx2_base64_encode(char* dest, const char* str, size_t len) {
       size_t outlen  = 0;
+      if (len >= 6) {
+        outlen = chromium_base64_encode(dest, str, 6); // TODO: inline
+        len -= 6;
+        str += 6;
+        dest += 8;
+      }
       while (len >= 32) {
         // Load string:
-        __m256i inputvector = _mm256_loadu_si256((__m256i *)str);
+        // Note: Now we're reading 4 bytes off the input str, but
+        //       it's safe due to the if before the loop.
+        __m256i inputvector = _mm256_loadu_si256((__m256i *)(str - 4));
         // Reshuffle:
         inputvector = enc_reshuffle(inputvector);
         // Translate reshuffled bytes to the Base64 alphabet:
