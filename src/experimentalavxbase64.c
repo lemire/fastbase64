@@ -123,34 +123,6 @@ size_t expavx2_base64_encode(char* dest, const char* str, size_t len) {
       return (dest - dest_orig) + scalarret;
 }
 
-size_t old_expavx2_base64_encode(char* dest, const char* str, size_t len) {
-      char* dest_orig = dest;
-      if (len >= 6) {
-        chromium_base64_encode(dest, str, 6); // TODO: inline
-        len -= 6;
-        str += 6;
-        dest += 8;
-      }
-
-      while (len >= 32) {
-        // Load string:
-        // Note: Now we're reading 4 bytes off the input str, but
-        //       it's safe due to the if before the loop.
-        __m256i inputvector = _mm256_loadu_si256((__m256i *)(str - 4));
-        // Reshuffle:
-        inputvector = enc_reshuffle(inputvector);
-        // Translate reshuffled bytes to the Base64 alphabet:
-        inputvector = enc_translate(inputvector);
-        _mm256_storeu_si256((__m256i *)dest, inputvector);
-        str += 24;
-        dest += 32;
-        len -= 24;
-      }
-      size_t scalarret = chromium_base64_encode(dest, str, len);
-      if(scalarret == MODP_B64_ERROR) return MODP_B64_ERROR;
-      return (dest - dest_orig) + scalarret;
-}
-
 size_t expavx2_base64_decode(char *out, const char *src, size_t srclen) {
       char* out_orig = out;
       while (srclen >= 45) {
