@@ -15,6 +15,7 @@
 
 #include "quicktimebase64.h"
 #include "linuxbase64.h"
+#include "turbobase64.h"
 
 
 void chromium_checkExample(const char * source, const char * coded) {
@@ -75,6 +76,28 @@ void linux_checkExample(const char * source, const char * coded) {
   assert(strncmp(dest2,source,strlen(source)) == 0);
   char *dest3 = (char*) malloc(chromium_base64_decode_len(codedlen));
   len = linux_base64_decode(dest3, dest1, dest1 + codedlen);
+  assert(len == strlen(source));
+  assert(strncmp(dest3,source,strlen(source)) == 0);
+  free(dest1);
+  free(dest2);
+  free(dest3);
+}
+
+
+void turbobase64_checkExample(const char * source, const char * coded) {
+  printf("TurboBase64 codec check.\n");
+  unsigned int len;
+  unsigned int codedlen;
+
+  char * dest1 = (char*) malloc(chromium_base64_encode_len(strlen(source)));
+  codedlen = chromium_base64_encode(dest1, source, strlen(source));
+  assert(strncmp(dest1,coded,codedlen) == 0);
+  char *dest2 = (char*) malloc(chromium_base64_decode_len(codedlen));
+  len = turbobase64_base64_decode(dest2, coded, coded + codedlen);
+  assert(len == strlen(source));
+  assert(strncmp(dest2,source,strlen(source)) == 0);
+  char *dest3 = (char*) malloc(chromium_base64_decode_len(codedlen));
+  len = turbobase64_base64_decode(dest3, dest1, dest1 + codedlen);
   assert(len == strlen(source));
   assert(strncmp(dest3,source,strlen(source)) == 0);
   free(dest1);
@@ -199,6 +222,10 @@ ZSBzaG9ydCB2ZWhlbWVuY2Ugb2YgYW55IGNhcm5hbCBwbGVhc3VyZS4=";
   linux_checkExample(wikipediasource,wikipediacoded);
   linux_checkExample(gosource,gocoded);
   linux_checkExample(tutosource,tutocoded);
+
+  turbobase64_checkExample(wikipediasource,wikipediacoded);
+  turbobase64_checkExample(gosource,gocoded);
+  turbobase64_checkExample(tutosource,tutocoded);
 
 
 	printf("Code looks ok.\n");

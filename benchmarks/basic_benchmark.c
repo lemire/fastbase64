@@ -17,6 +17,7 @@
 #include "chromiumbase64.h"
 #include "quicktimebase64.h"
 #include "linuxbase64.h"
+#include "turbobase64.h"
 
 static const int repeat = 50;
 
@@ -35,6 +36,7 @@ void testencode(const char * data, size_t datalength, bool verbose) {
   assert(outputlength == expected);
   BEST_TIME_CHECK(scalar_base64_encode(data,datalength,buffer,&outputlength),(outputlength == avxexpected), , repeat, datalength,verbose);
   BEST_TIME_CHECK(expavx2_base64_encode(buffer, data, datalength), (int) expected, , repeat, datalength,verbose);
+  BEST_TIME_CHECK(turbobase64_base64_encode(buffer, data, datalength), (int) expected, , repeat, datalength,verbose);
   free(buffer);
   if(verbose) printf("\n");
 }
@@ -60,6 +62,7 @@ void testdecode(const char * data, size_t datalength, bool verbose) {
   BEST_TIME(scalar_base64_decode(data,datalength,buffer,&outputlength), avxexpected, , repeat, datalength,verbose);
   BEST_TIME(avx2_base64_decode(data,datalength,buffer,&outputlength), avxexpected, , repeat, datalength,verbose);
   BEST_TIME(expavx2_base64_decode(buffer, data, datalength), (int) expected, , repeat, datalength,verbose);
+  BEST_TIME(turbobase64_base64_decode(buffer, data, datalength), (int) expected, , repeat, datalength,verbose);
 
   free(buffer);
   if(verbose) printf("\n");
