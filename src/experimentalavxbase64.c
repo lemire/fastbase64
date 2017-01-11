@@ -141,64 +141,47 @@ size_t expavx2_base64_decode(char *out, const char *src, size_t srclen) {
 
         __m256i str = _mm256_loadu_si256((__m256i *)src);
 
-        // inlined function lookup_pshufb_bitmask from https://github.com/WojciechMula/base64simd/blob/master/decode/lookup.avx2.cpp
-        // http://0x80.pl/notesen/2016-01-17-sse-base64-decoding.html#lookup-pshufb-bitmask
-
-        const __m256i higher_nibble = _mm256_and_si256(_mm256_srli_epi32(str, 4), _mm256_set1_epi8(0x0f));
-        const __m256i lower_nibble  = _mm256_and_si256(str, _mm256_set1_epi8(0x0f));
-
-        const __m256i shiftLUT = _mm256_setr_epi8(
-            0,   0,  19,   4, -65, -65, -71, -71,
+        // code by @aqrit from
+        // https://github.com/WojciechMula/base64simd/issues/3#issuecomment-271137490
+        // transated into AVX2
+        const __m256i lut_lo = _mm256_setr_epi8(
+            0x15, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 
+            0x11, 0x11, 0x13, 0x1A, 0x1B, 0x1B, 0x1B, 0x1A,
+            0x15, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 
+            0x11, 0x11, 0x13, 0x1A, 0x1B, 0x1B, 0x1B, 0x1A 
+        );
+        const __m256i lut_hi = _mm256_setr_epi8(
+            0x10, 0x10, 0x01, 0x02, 0x04, 0x08, 0x04, 0x08, 
+            0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10,
+            0x10, 0x10, 0x01, 0x02, 0x04, 0x08, 0x04, 0x08, 
+            0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10
+        );
+        const __m256i lut_roll = _mm256_setr_epi8(
+            0,   16,  19,   4, -65, -65, -71, -71,
             0,   0,   0,   0,   0,   0,   0,   0,
-
-            0,   0,  19,   4, -65, -65, -71, -71,
+            0,   16,  19,   4, -65, -65, -71, -71,
             0,   0,   0,   0,   0,   0,   0,   0
         );
+        const __m256i mask_2F = _mm256_set1_epi8( 0x2F );
 
-        const __m256i maskLUT  = _mm256_setr_epi8(
-            /* 0        */ (char)(0b10101000),
-            /* 1 .. 9   */ (char)(0b11111000), (char)(0b11111000), (char)(0b11111000), (char)(0b11111000),
-                           (char)(0b11111000), (char)(0b11111000), (char)(0b11111000), (char)(0b11111000),
-                           (char)(0b11111000),
-            /* 10       */ (char)(0b11110000),
-            /* 11       */ (char)(0b01010100),
-            /* 12 .. 14 */ (char)(0b01010000), (char)(0b01010000), (char)(0b01010000),
-            /* 15       */ (char)(0b01010100),
-
-            /* 0        */ (char)(0b10101000),
-            /* 1 .. 9   */ (char)(0b11111000), (char)(0b11111000), (char)(0b11111000), (char)(0b11111000),
-                           (char)(0b11111000), (char)(0b11111000), (char)(0b11111000), (char)(0b11111000),
-                           (char)(0b11111000),
-            /* 10       */ (char)(0b11110000),
-            /* 11       */ (char)(0b01010100),
-            /* 12 .. 14 */ (char)(0b01010000), (char)(0b01010000), (char)(0b01010000),
-            /* 15       */ (char)(0b01010100)
-        );
-
-        const __m256i bitposLUT = _mm256_setr_epi8(
-            0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, (char)(0x80),
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-
-            0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, (char)(0x80),
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-        );
-
-        const __m256i sh     = _mm256_shuffle_epi8(shiftLUT,  higher_nibble);
-        const __m256i eq_2f  = _mm256_cmpeq_epi8(str, _mm256_set1_epi8(0x2f));
-        const __m256i shift  = _mm256_blendv_epi8(sh, _mm256_set1_epi8(16), eq_2f);
-
-        const __m256i M      = _mm256_shuffle_epi8(maskLUT,   lower_nibble);
-        const __m256i bit    = _mm256_shuffle_epi8(bitposLUT, higher_nibble);
-
-        const __m256i non_match = _mm256_cmpeq_epi8(_mm256_and_si256(M, bit), _mm256_setzero_si256());
-
-        if (_mm256_movemask_epi8(non_match)) {
+        // lookup
+        __m256i hi_nibbles, lo_nibbles, lo, hi, roll, eq_2F;
+        hi_nibbles = _mm256_srli_epi32( str, 4 );
+        lo_nibbles = _mm256_and_si256( str, mask_2F );
+        lo = _mm256_shuffle_epi8( lut_lo, lo_nibbles );
+        eq_2F = _mm256_cmpeq_epi8( str, mask_2F );
+        hi_nibbles = _mm256_and_si256( hi_nibbles, mask_2F );
+        hi = _mm256_shuffle_epi8( lut_hi, hi_nibbles );
+        roll = _mm256_shuffle_epi8( lut_roll, _mm256_add_epi8( eq_2F, hi_nibbles ) );
+        if( ! _mm256_testz_si256( lo, hi ) ) {
             break;
         }
+
+        str = _mm256_add_epi8( str, roll );
+        // end of copied function
+
         srclen -= 32;
         src += 32;
-
-        str = _mm256_add_epi8(str, shift);
 
         // end of inlined function
 
