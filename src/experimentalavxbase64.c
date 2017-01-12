@@ -162,22 +162,25 @@ size_t expavx2_base64_decode(char *out, const char *src, size_t srclen) {
             0,   16,  19,   4, -65, -65, -71, -71,
             0,   0,   0,   0,   0,   0,   0,   0
         );
-        const __m256i mask_2F = _mm256_set1_epi8( 0x2F );
+
+        const __m256i mask_2F = _mm256_set1_epi8(0x2f);
 
         // lookup
-        __m256i hi_nibbles, lo_nibbles, lo, hi, roll, eq_2F;
-        hi_nibbles = _mm256_srli_epi32( str, 4 );
-        lo_nibbles = _mm256_and_si256( str, mask_2F );
-        lo = _mm256_shuffle_epi8( lut_lo, lo_nibbles );
-        eq_2F = _mm256_cmpeq_epi8( str, mask_2F );
-        hi_nibbles = _mm256_and_si256( hi_nibbles, mask_2F );
-        hi = _mm256_shuffle_epi8( lut_hi, hi_nibbles );
-        roll = _mm256_shuffle_epi8( lut_roll, _mm256_add_epi8( eq_2F, hi_nibbles ) );
-        if( ! _mm256_testz_si256( lo, hi ) ) {
+        __m256i hi_nibbles  = _mm256_srli_epi32(str, 4);
+        __m256i lo_nibbles  = _mm256_and_si256(str, mask_2F);
+
+        const __m256i lo    = _mm256_shuffle_epi8(lut_lo, lo_nibbles);
+        const __m256i eq_2F = _mm256_cmpeq_epi8(str, mask_2F);
+
+        hi_nibbles = _mm256_and_si256(hi_nibbles, mask_2F);
+        const __m256i hi    = _mm256_shuffle_epi8(lut_hi, hi_nibbles);
+        const __m256i roll  = _mm256_shuffle_epi8(lut_roll, _mm256_add_epi8(eq_2F, hi_nibbles));
+
+        if (!_mm256_testz_si256(lo, hi)) {
             break;
         }
 
-        str = _mm256_add_epi8( str, roll );
+        str = _mm256_add_epi8(str, roll);
         // end of copied function
 
         srclen -= 32;
