@@ -3,7 +3,7 @@
 .PHONY: all clean
 #
 .SUFFIXES: .cpp .o .c .h
-CFLAGS= -fPIC -std=c99 -Wall -Wextra -Wshadow -Wpsabi
+CFLAGS= -fPIC -std=c99 -Wall -Wextra -Wshadow -Wpsabi -Wfatal-errors
 ifeq ($(DEBUG),1)
 CFLAGS += -ggdb -fsanitize=undefined  -fno-omit-frame-pointer -fsanitize=address
 else
@@ -29,10 +29,13 @@ OBJECTS=chromiumbase64.o \
 %.o: ./src/%.c $(HEADERS)
 	$(CC) $(CFLAGS) -c $< -Iinclude
 
-basic_benchmark: ./benchmarks/basic_benchmark.c  ./benchmarks/benchmark.h  $(HEADERS) $(OBJECTS)
+src/compress.inl: src/prepare_luts.py
+	python $^ > $@
+
+basic_benchmark: ./benchmarks/basic_benchmark.c  ./benchmarks/benchmark.h   src/compress.inl $(HEADERS) $(OBJECTS)
 	$(CC) $(CFLAGS) -o $@ ./benchmarks/basic_benchmark.c -Iinclude  $(OBJECTS)
 
-unit: ./tests/unit.c  $(HEADERS) $(OBJECTS)
+unit: ./tests/unit.c src/compress.inl $(HEADERS) $(OBJECTS)
 	$(CC) $(CFLAGS) -o unit ./tests/unit.c -Iinclude  $(OBJECTS)
 
 clean:

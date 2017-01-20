@@ -38,3 +38,6 @@ basic_benchmark
 
 # Other
 *perf.txt
+
+# Generated files
+src/compress.inl
