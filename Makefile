@@ -10,7 +10,7 @@ else
 CFLAGS += -O3 -march=native -mavx2
 endif # debug
 
-all: unit basic_benchmark
+all: unit basic_benchmark test_ws_decode
 
 
 HEADERS=./include/chromiumbase64.h \
@@ -36,7 +36,10 @@ basic_benchmark: ./benchmarks/basic_benchmark.c  ./benchmarks/benchmark.h   src/
 	$(CC) $(CFLAGS) -o $@ ./benchmarks/basic_benchmark.c -Iinclude  $(OBJECTS)
 
 unit: ./tests/unit.c src/compress.inl $(HEADERS) $(OBJECTS)
-	$(CC) $(CFLAGS) -o unit ./tests/unit.c -Iinclude  $(OBJECTS)
+	$(CC) $(CFLAGS) -o $@ ./tests/unit.c -Iinclude  $(OBJECTS)
+
+test_ws_decode: ./tests/test_ws_decode.c src/compress.inl $(HEADERS) $(OBJECTS)
+	$(CC) $(CFLAGS) -o $@ ./tests/test_ws_decode.c -Iinclude  $(OBJECTS)
 
 clean:
 	rm -f unit basic_benchmark *.o

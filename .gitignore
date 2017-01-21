@@ -35,6 +35,7 @@
 # Executables
 unit
 basic_benchmark
+test_ws_decode
 
 # Other
 *perf.txt
