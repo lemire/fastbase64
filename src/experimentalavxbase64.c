@@ -288,7 +288,7 @@ size_t expavx2_base64_decode(char *out, const char *src, size_t srclen) {
             const size_t   hi_cnt = _mm_popcnt_u32(hi_msk);
 
             assert(ws_count <= 32);
-            if (lo_cnt) {
+            if (true || lo_cnt) {
                 const __m128i v = _mm256_extractf128_si256(decoded, 0);
                 const __m128i L = _mm_loadu_si128((__m128i*)&compress_LUT[lo_msk*16]);
                 const __m128i c = _mm_shuffle_epi8(v, L);
@@ -297,7 +297,7 @@ size_t expavx2_base64_decode(char *out, const char *src, size_t srclen) {
                 ws_count += lo_cnt;
             }
 
-            if (hi_cnt) {
+            if (true || hi_cnt) {
                 const __m128i v = _mm256_extractf128_si256(decoded, 1);
                 const __m128i L = _mm_loadu_si128((__m128i*)&compress_LUT[hi_msk*16]);
                 const __m128i c = _mm_shuffle_epi8(v, L);
@@ -315,7 +315,6 @@ size_t expavx2_base64_decode(char *out, const char *src, size_t srclen) {
                 _mm256_storeu_si256((__m256i*)out, str);
 
                 out += 24;
-
                 ws_count -= 32;
 
                 // move the high 32 bytes of buffer into the lower part
@@ -328,6 +327,7 @@ size_t expavx2_base64_decode(char *out, const char *src, size_t srclen) {
 
         // no error, but we have leftovers in the buffer
         if (ws_count > 0) {
+            
             assert(ws_count <= 32);
 
             // store decoded data at the end of buffer

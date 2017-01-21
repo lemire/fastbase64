@@ -74,6 +74,7 @@ int main() {
   const int N = 2048;
   char randombuffer[N];
   for(int k = 0; k < N; ++k) randombuffer[k] = rand();
+#if 0
   const char * decodingfilename = "decodingperf.txt";
   const char * encodingfilename = "encodingperf.txt";
   printf("See files %s %s ... \n", encodingfilename,decodingfilename);
@@ -106,7 +107,7 @@ int main() {
   if ( freopen(ttystr,"w",stdout) == NULL ) {
      printf("error opening %s \n", ttystr);
   }
-
+#endif
   printf("Testing with real data.\n");
 
   printf("lena [jpg]\n");

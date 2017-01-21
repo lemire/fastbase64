@@ -28,16 +28,8 @@ void testdecode(const char * data, size_t datalength, bool verbose) {
   if(verbose) printf("original size = %zu \n",expected);
   BEST_TIME_NOCHECK(memcpy(buffer, data, datalength),  , repeat, datalength,verbose);
  
-  BEST_TIME(linux_base64_decode(buffer, data, data + datalength), (int) expected, , repeat, datalength,verbose);
-  BEST_TIME(quicktime_base64_decode(buffer, data), (int) expected, , repeat, datalength,verbose);
-  BEST_TIME(chromium_base64_decode(buffer, data, datalength), (int) expected, , repeat, datalength,verbose);
-
   size_t outputlength;
-  int avxexpected =  avx2_base64_decode(data,datalength,buffer,&outputlength);
-  assert(outputlength == expected);
-  BEST_TIME(scalar_base64_decode(data,datalength,buffer,&outputlength), avxexpected, , repeat, datalength,verbose);
-  BEST_TIME(avx2_base64_decode(data,datalength,buffer,&outputlength), avxexpected, , repeat, datalength,verbose);
-  BEST_TIME(expavx2_base64_decode(buffer, data, datalength), (int) expected, , repeat, datalength,verbose);
+  BEST_TIME_NOCHECK(expavx2_base64_decode(buffer, data, datalength), , repeat, datalength,verbose);
 
   free(buffer);
   if(verbose) printf("\n");
