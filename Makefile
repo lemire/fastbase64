@@ -26,7 +26,7 @@ OBJECTS=chromiumbase64.o \
         scalarbase64.o 
 
 
-%.o: ./src/%.c $(HEADERS)
+%.o: ./src/%.c $(HEADERS) src/compress.inl
 	$(CC) $(CFLAGS) -c $< -Iinclude
 
 src/compress.inl: src/prepare_luts.py

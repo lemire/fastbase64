@@ -24,7 +24,7 @@ def prepare_popcnt_LUT():
 
 
 def main():
-    print "uint8_t compress_LUT[16 * 65536] = {"
+    print "uint8_t compress_LUT[16 * 65536] __attribute__((aligned(4096))) = {"
     prepare_popcnt_LUT()
     print "};"
 

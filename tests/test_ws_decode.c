@@ -49,6 +49,18 @@ void load_file(const char* path, struct Data* d) {
 typedef size_t (*DecodeFun)(char *out, const char *src, size_t srclen);
 
 
+int compare_mem(char* s1, char* s2, size_t len) {
+    for (size_t i=0; i < len; i++) {
+        if (s1[i] != s2[i]) {
+            printf("differs at #%u", i);
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+
 void test(const char* name, DecodeFun decode, struct Data* binary, struct Data* base64, struct Data* base64ws) {
    
     printf("testing %s... ", name);
@@ -56,19 +68,27 @@ void test(const char* name, DecodeFun decode, struct Data* binary, struct Data* 
 
     char* decoded = (char*)malloc(binary->size);
 
+#if 0
     decode(decoded, base64->data, base64->size);
     if (memcmp(decoded, binary->data, binary->size) != 0) {
         puts("FAILED (1)");
         return;
+    } else {
+        printf("[base64]");
+        fflush(stdout);
     }
+#endif
 
     decode(decoded, base64ws->data, base64ws->size);
-    if (memcmp(decoded, binary->data, binary->size) != 0) {
+    if (compare_mem(decoded, binary->data, binary->size) != 0) {
         puts("FAILED (2)");
         return;
+    } else {
+        printf("[base64ws]");
+        fflush(stdout);
     }
 
-    puts("OK");
+    puts(" OK");
 }
 
 
@@ -86,7 +106,8 @@ int main(int argc, char* argv[]) {
     load_file(argv[2], &base64);
     load_file(argv[3], &base64ws);
 
-    test("chrome", chromium_base64_decode, &binary, &base64, &base64ws);
+    //test("chrome", chromium_base64_decode, &binary, &base64, &base64ws);
+    test("expavx2", expavx2_base64_decode, &binary, &base64, &base64ws);
 
     destroy(&binary);
     destroy(&base64);

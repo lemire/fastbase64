@@ -3,6 +3,7 @@
 #include <x86intrin.h>
 #include <stdbool.h>
 #include <assert.h>
+#include <string.h>
 
 /**
 * This code borrows from Wojciech Mula's library at
@@ -139,10 +140,76 @@ __m256i check_ws(const __m256i v) {
 }
 
 
+#if 0
+static
+void dump(const __m256i v) {
+    
+    char tmp[32];
+
+    _mm256_storeu_si256((__m256i*)tmp, v);
+
+    putchar('\'');
+    for (int i=0; i < 32; i++) {
+        putchar(tmp[i]);
+    }
+    putchar('\'');
+}
+
+
+static
+void dump16(const __m128i v) {
+
+    char tmp[16] __attribute__((aligned(16)));
+
+    _mm_storeu_si128((__m128i*)tmp, v);
+
+    putchar('\'');
+    for (int i=0; i < 16; i++) {
+        putchar(tmp[i]);
+    }
+    putchar('\'');
+}
+
+
+static
+void dump16hex(const __m128i v) {
+
+    char tmp[16] __attribute__((aligned(16)));
+
+    _mm_storeu_si128((__m128i*)tmp, v);
+
+    putchar('\'');
+    for (int i=0; i < 16; i++) {
+        printf("%02x ", (uint8_t)tmp[i]);
+    }
+    putchar('\'');
+}
+
+
+static
+void dumphex(const __m256i v) {
+    
+    char tmp[32];
+
+    _mm256_storeu_si256((__m256i*)tmp, v);
+
+    putchar('\'');
+    for (int i=0; i < 32; i++) {
+        putchar(tmp[i] ? '1' : '0');
+        //printf("%02x", tmp[i]);
+    }
+    putchar('\'');
+}
+#endif
+
+
+static char* encode_LUT = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+
 size_t expavx2_base64_decode(char *out, const char *src, size_t srclen) {
 
-      uint8_t buffer[2*32];
-      size_t  ws_count = 0;
+      uint8_t buffer[2*32] __attribute__((aligned(32)));
+      int ws_count = 0;
 
       char* out_orig = out;
       while (srclen >= 45) {
@@ -183,6 +250,11 @@ size_t expavx2_base64_decode(char *out, const char *src, size_t srclen) {
             0,   0,   0,   0,   0,   0,   0,   0
         );
 
+#define DUMP(var) printf("%-10s = ", #var); dump(var); putchar('\n')
+#define DUMPHEX(var) printf("%-10s = ", #var); dumphex(var); putchar('\n')
+#define DUMP16(var) printf("%-10s = ", #var); dump16(var); putchar('\n')
+#define DUMP16HEX(var) printf("%-10s = ", #var); dump16hex(var); putchar('\n')
+
         const __m256i mask_2F = _mm256_set1_epi8(0x2f);
 
         // lookup
@@ -201,14 +273,14 @@ size_t expavx2_base64_decode(char *out, const char *src, size_t srclen) {
             // check if all invalid chars are WS
             const __m256i ws  = check_ws(str);
             const __m256i err = _mm256_cmpeq_epi8(_mm256_and_si256(lo, hi), _mm256_setzero_si256());
-
+            
             if (!_mm256_testz_si256(ws, err)) {
                 // there are non-base64 chars that are not white spaces
                 break;
             }
 
             // compress all valid characters
-            const uint32_t mask   = _mm256_movemask_epi8(ws);
+            const uint32_t mask   = ~_mm256_movemask_epi8(ws);
             const uint16_t lo_msk = mask & 0xffff;
             const uint16_t hi_msk = mask >> 16;
             
@@ -218,31 +290,37 @@ size_t expavx2_base64_decode(char *out, const char *src, size_t srclen) {
             assert(ws_count <= 32);
             if (lo_cnt) {
                 const __m128i v = _mm256_extractf128_si256(decoded, 0);
-                const __m128i c = _mm_shuffle_epi8(_mm_load_si128((__m128i*)&compress_LUT[lo_msk]), v);
+                const __m128i L = _mm_loadu_si128((__m128i*)&compress_LUT[lo_msk*16]);
+                const __m128i c = _mm_shuffle_epi8(v, L);
 
-                _mm_store_si128((__m128i*)(buffer + ws_count), c);
+                _mm_storeu_si128((__m128i*)(buffer + ws_count), c);
+                ws_count += lo_cnt;
             }
 
             if (hi_cnt) {
                 const __m128i v = _mm256_extractf128_si256(decoded, 1);
-                const __m128i c = _mm_shuffle_epi8(_mm_load_si128((__m128i*)&compress_LUT[hi_msk]), v);
+                const __m128i L = _mm_loadu_si128((__m128i*)&compress_LUT[hi_msk*16]);
+                const __m128i c = _mm_shuffle_epi8(v, L);
 
-                _mm_store_si128((__m128i*)(buffer + ws_count), c);
+                _mm_storeu_si128((__m128i*)(buffer + ws_count), c);
+                ws_count += hi_cnt;
             }
+
+            srclen -= 32;
+            src += 32;
 
             // lower 32 bytes of the buffer are full, pack and save
             if (ws_count >= 32) {
-                str = dec_reshuffle(_mm256_loadu_si256((__m256i*)buffer));
+                str = dec_reshuffle(_mm256_load_si256((__m256i*)buffer));
                 _mm256_storeu_si256((__m256i*)out, str);
 
-                srclen -= 32;
-                src += 32;
                 out += 24;
 
                 ws_count -= 32;
+
                 // move the high 32 bytes of buffer into the lower part
-                const __m256i tmp = _mm256_loadu_si256((__m256i*)(buffer + 32));
-                _mm256_storeu_si256((__m256i*)(buffer), tmp);
+                const __m256i tmp = _mm256_load_si256((__m256i*)(buffer + 32));
+                _mm256_store_si256((__m256i*)(buffer), tmp);
             }
 
             continue; // !!!
@@ -256,27 +334,22 @@ size_t expavx2_base64_decode(char *out, const char *src, size_t srclen) {
             _mm256_storeu_si256((__m256i*)(buffer + ws_count), decoded);
 
             // pack 32 lower bytes from the buffer
-            str = dec_reshuffle(_mm256_loadu_si256((__m256i*)buffer));
+            str = dec_reshuffle(_mm256_load_si256((__m256i*)buffer));
             _mm256_storeu_si256((__m256i*)out, str);
 
             srclen -= 32;
             src += 32;
             out += 24;
 
-            ws_count -= 32;
             // move the high 32 bytes of buffer into the lower part
-            const __m256i tmp = _mm256_loadu_si256((__m256i*)(buffer + 32));
-            _mm256_storeu_si256((__m256i*)(buffer), tmp);
+            const __m256i tmp = _mm256_load_si256((__m256i*)(buffer + 32));
+            _mm256_store_si256((__m256i*)(buffer), tmp);
 
             continue; // !!!
         }
 
-        // end of copied function
-
         srclen -= 32;
         src += 32;
-
-        // end of inlined function
 
         // Reshuffle the input to packed 12-byte output format:
         str = dec_reshuffle(decoded);
@@ -284,9 +357,19 @@ size_t expavx2_base64_decode(char *out, const char *src, size_t srclen) {
         out += 24;
       }
 
-      // TODO: handle leftovers in buffer, if any
       if (ws_count) {
-          assert(false && "not implemented yet");
+          // XXX: this is still broken
+
+          char tmp[45 + 32 + 1];
+          for (int i=0; i < ws_count; i++) {
+            // Buffer is already translated, so we're translating it back to ASCII
+            tmp[i] = encode_LUT[buffer[i]];
+          }
+          memcpy(tmp + ws_count, src, srclen);
+
+          size_t scalarret = chromium_base64_decode(out, tmp, srclen + ws_count);
+          if(scalarret == MODP_B64_ERROR) return MODP_B64_ERROR;
+          return (out - out_orig) + scalarret;
       } else {
           size_t scalarret = chromium_base64_decode(out, src, srclen);
           if(scalarret == MODP_B64_ERROR) return MODP_B64_ERROR;
