@@ -1,4 +1,4 @@
-# load base64 file and insert random number of spaces between characters
+# load base64 file and insert random number of spaces between characters with given probability
 
 import sys
 from random import randint, random, seed
@@ -8,12 +8,12 @@ def load(path):
         return f.read()
 
 
-def insertspaces(data):
+def insertspaces(data, prob):
 
     result = ''
 
     for c in data:
-        if random() > 0.8:
+        if random() <= prob:
             k = randint(1, 33)
             result += ' ' * k
 
@@ -27,7 +27,7 @@ def main():
     seed(0) # make the results predictable
 
     data = load(sys.argv[1])
-    print insertspaces(data)
+    print insertspaces(data, float(sys.argv[2]))
 
 if __name__ == '__main__':
     main()
