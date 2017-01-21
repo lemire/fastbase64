@@ -10,7 +10,7 @@ else
 CFLAGS += -O3 -march=native -mavx2
 endif # debug
 
-all: unit basic_benchmark test_ws_decode
+all: unit basic_benchmark benchmark_decode test_ws_decode
 
 
 HEADERS=./include/chromiumbase64.h \
@@ -32,8 +32,11 @@ OBJECTS=chromiumbase64.o \
 src/compress.inl: src/prepare_luts.py
 	python $^ > $@
 
-basic_benchmark: ./benchmarks/basic_benchmark.c  ./benchmarks/benchmark.h   src/compress.inl $(HEADERS) $(OBJECTS)
+basic_benchmark: ./benchmarks/basic_benchmark.c ./benchmarks/benchmark.h src/compress.inl $(HEADERS) $(OBJECTS)
 	$(CC) $(CFLAGS) -o $@ ./benchmarks/basic_benchmark.c -Iinclude  $(OBJECTS)
+
+benchmark_decode: ./benchmarks/benchmark_decode.c ./benchmarks/benchmark.h src/compress.inl $(HEADERS) $(OBJECTS)
+	$(CC) $(CFLAGS) -o $@ $< -Iinclude  $(OBJECTS)
 
 unit: ./tests/unit.c src/compress.inl $(HEADERS) $(OBJECTS)
 	$(CC) $(CFLAGS) -o $@ ./tests/unit.c -Iinclude  $(OBJECTS)
