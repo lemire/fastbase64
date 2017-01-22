@@ -70,16 +70,16 @@ int main(int argc, char **argv) {
   RDTSC_SET_OVERHEAD(rdtsc_overhead_func(1), repeat);
 
   if (argc == 1) {
-    puts("usage: program base64-encoded-file");
+    puts("usage: program base64-encoded-files");
     return EXIT_FAILURE;
   }
 
   struct Data base64;
 
   for (int i=1; i < argc; i++) {
-      load_file(argv[1], &base64);
+      load_file(argv[i], &base64);
 
-      printf("%s\n", argv[1]);
+      printf("%s\n", argv[i]);
       testdecode(base64.data, base64.size, true);
       destroy(&base64);
   }
