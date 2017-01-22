@@ -44,5 +44,34 @@ unit: ./tests/unit.c src/compress.inl $(HEADERS) $(OBJECTS)
 test_ws_decode: ./tests/test_ws_decode.c src/compress.inl $(HEADERS) $(OBJECTS)
 	$(CC) $(CFLAGS) -o $@ ./tests/test_ws_decode.c -Iinclude  $(OBJECTS)
 
+
+# decoding with spaces
+
+SCRIPT=images/standard_test_images/insert_ws.py
+IMAGE=images/standard_test_images/lena_color_512.base64 
+
+test1.base64: $(IMAGE) $(SCRIPT)
+	python $(SCRIPT) $(IMAGE) 0.001 > $@
+
+test2.base64: $(IMAGE) $(SCRIPT)
+	python $(SCRIPT) $(IMAGE) 0.005 > $@
+
+test3.base64: $(IMAGE) $(SCRIPT)
+	python $(SCRIPT) $(IMAGE) 0.01 > $@
+
+test4.base64: $(IMAGE) $(SCRIPT)
+	python $(SCRIPT) $(IMAGE) 0.05 > $@
+
+test5.base64: $(IMAGE) $(SCRIPT)
+	python $(SCRIPT) $(IMAGE) 0.1 > $@
+
+test6.base64: $(IMAGE) $(SCRIPT)
+	python $(SCRIPT) $(IMAGE) 0.5 > $@
+
+TEST_BASE64=test1.base64 test2.base64 test3.base64 test4.base64 test5.base64 test6.base64 $(IMAGE)
+
+run_decoding_benchmark: benchmark_decode $(TEST_BASE64)
+	./$< $(TEST_BASE64)
+
 clean:
 	rm -f unit basic_benchmark *.o
