@@ -140,239 +140,111 @@ __m256i check_ws(const __m256i v) {
 }
 
 
-#if 0
-static
-void dump(const __m256i v) {
-    
-    char tmp[32];
-
-    _mm256_storeu_si256((__m256i*)tmp, v);
-
-    putchar('\'');
-    for (int i=0; i < 32; i++) {
-        putchar(tmp[i]);
-    }
-    putchar('\'');
-}
-
-
-static
-void dump16(const __m128i v) {
-
-    char tmp[16] __attribute__((aligned(16)));
-
-    _mm_storeu_si128((__m128i*)tmp, v);
-
-    putchar('\'');
-    for (int i=0; i < 16; i++) {
-        putchar(tmp[i]);
-    }
-    putchar('\'');
-}
-
-
-static
-void dump16hex(const __m128i v) {
-
-    char tmp[16] __attribute__((aligned(16)));
-
-    _mm_storeu_si128((__m128i*)tmp, v);
-
-    putchar('\'');
-    for (int i=0; i < 16; i++) {
-        printf("%02x ", (uint8_t)tmp[i]);
-    }
-    putchar('\'');
-}
-
-
-static
-void dumphex(const __m256i v) {
-    
-    char tmp[32];
-
-    _mm256_storeu_si256((__m256i*)tmp, v);
-
-    putchar('\'');
-    for (int i=0; i < 32; i++) {
-        putchar(tmp[i] ? '1' : '0');
-        //printf("%02x", tmp[i]);
-    }
-    putchar('\'');
-}
-#endif
-
-
 static char* encode_LUT = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 
 size_t expavx2_base64_decode(char *out, const char *src, size_t srclen) {
 
-      uint8_t buffer[2*32] __attribute__((aligned(32)));
-      int ws_count = 0;
+#define BUF_SIZE 256
+
+      uint8_t buffer[BUF_SIZE + 64] __attribute__((aligned(32)));
+      int pos = 0;
+      const char* end = src + srclen;
+
+      __m128i spaces = _mm_set1_epi8(' ');
+      __m128i newline = _mm_set1_epi8('\n');
+      __m128i carriage = _mm_set1_epi8('\r');
 
       char* out_orig = out;
-      while (srclen >= 45) {
+      char* before_compress = src;
+      while (true) {
 
-        // The input consists of six character sets in the Base64 alphabet,
-        // which we need to map back to the 6-bit values they represent.
-        // There are three ranges, two singles, and then there's the rest.
-        //
-        //  #  From       To        Add  Characters
-        //  1  [43]       [62]      +19  +
-        //  2  [47]       [63]      +16  /
-        //  3  [48..57]   [52..61]   +4  0..9
-        //  4  [65..90]   [0..25]   -65  A..Z
-        //  5  [97..122]  [26..51]  -71  a..z
-        // (6) Everything else => invalid input
+        //printf("srclen = %d, pos = %d\n", srclen, pos);
+        // 1. despace
+        //before_compress = src;
+        while (pos < BUF_SIZE) {
 
-        __m256i str = _mm256_loadu_si256((__m256i *)src);
+            //printf("srclen = %d, pos = %d\n", srclen, pos);
 
-        // code by @aqrit from
-        // https://github.com/WojciechMula/base64simd/issues/3#issuecomment-271137490
-        // transated into AVX2
-        const __m256i lut_lo = _mm256_setr_epi8(
-            0x15, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 
-            0x11, 0x11, 0x13, 0x1A, 0x1B, 0x1B, 0x1B, 0x1A,
-            0x15, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 
-            0x11, 0x11, 0x13, 0x1A, 0x1B, 0x1B, 0x1B, 0x1A 
-        );
-        const __m256i lut_hi = _mm256_setr_epi8(
-            0x10, 0x10, 0x01, 0x02, 0x04, 0x08, 0x04, 0x08, 
-            0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10,
-            0x10, 0x10, 0x01, 0x02, 0x04, 0x08, 0x04, 0x08, 
-            0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10
-        );
-        const __m256i lut_roll = _mm256_setr_epi8(
-            0,   16,  19,   4, -65, -65, -71, -71,
-            0,   0,   0,   0,   0,   0,   0,   0,
-            0,   16,  19,   4, -65, -65, -71, -71,
-            0,   0,   0,   0,   0,   0,   0,   0
-        );
+            __m128i x = _mm_loadu_si128((const __m128i *)(src));
+            // we do it the naive way, could be smarter?
+            __m128i xspaces = _mm_cmpeq_epi8(x, spaces);
+            __m128i xnewline = _mm_cmpeq_epi8(x, newline);
+            __m128i xcarriage = _mm_cmpeq_epi8(x, carriage);
+            __m128i anywhite = _mm_or_si128(_mm_or_si128(xspaces, xnewline), xcarriage);
+            const uint16_t mask16 = ~_mm_movemask_epi8(anywhite);
 
-#define DUMP(var) printf("%-10s = ", #var); dump(var); putchar('\n')
-#define DUMPHEX(var) printf("%-10s = ", #var); dumphex(var); putchar('\n')
-#define DUMP16(var) printf("%-10s = ", #var); dump16(var); putchar('\n')
-#define DUMP16HEX(var) printf("%-10s = ", #var); dump16hex(var); putchar('\n')
-
-        const __m256i mask_2F = _mm256_set1_epi8(0x2f);
-
-        // lookup
-        __m256i hi_nibbles  = _mm256_srli_epi32(str, 4);
-        __m256i lo_nibbles  = _mm256_and_si256(str, mask_2F);
-
-        const __m256i lo    = _mm256_shuffle_epi8(lut_lo, lo_nibbles);
-        const __m256i eq_2F = _mm256_cmpeq_epi8(str, mask_2F);
-
-        hi_nibbles = _mm256_and_si256(hi_nibbles, mask_2F);
-        const __m256i hi    = _mm256_shuffle_epi8(lut_hi, hi_nibbles);
-        const __m256i roll  = _mm256_shuffle_epi8(lut_roll, _mm256_add_epi8(eq_2F, hi_nibbles));
-        const __m256i decoded = _mm256_add_epi8(str, roll);
-
-        if (!_mm256_testz_si256(lo, hi)) {
-            // check if all invalid chars are WS
-            const __m256i ws  = check_ws(str);
-            const __m256i err = _mm256_cmpeq_epi8(_mm256_and_si256(lo, hi), _mm256_setzero_si256());
-            
-            if (!_mm256_testz_si256(ws, err)) {
-                // there are non-base64 chars that are not white spaces
-                break;
+            x = _mm_shuffle_epi8(x, _mm_loadu_si128((const __m128i *)compress_LUT + mask16));
+            _mm_storeu_si128((__m128i *)(buffer + pos), x);
+            pos += _mm_popcnt_u32(mask16);
+            src += 16;
+            if (src >= end) {
+                //puts("goto tail");
+                goto tail;
             }
-
-            // compress all valid characters
-            const uint32_t mask   = ~_mm256_movemask_epi8(ws);
-            const uint16_t lo_msk = mask & 0xffff;
-            const uint16_t hi_msk = mask >> 16;
-            
-            const size_t   lo_cnt = _mm_popcnt_u32(lo_msk);
-            const size_t   hi_cnt = _mm_popcnt_u32(hi_msk);
-
-            assert(ws_count <= 32);
-            if (true || lo_cnt) {
-                const __m128i v = _mm256_extractf128_si256(decoded, 0);
-                const __m128i L = _mm_loadu_si128((__m128i*)&compress_LUT[lo_msk*16]);
-                const __m128i c = _mm_shuffle_epi8(v, L);
-
-                _mm_storeu_si128((__m128i*)(buffer + ws_count), c);
-                ws_count += lo_cnt;
-            }
-
-            if (true || hi_cnt) {
-                const __m128i v = _mm256_extractf128_si256(decoded, 1);
-                const __m128i L = _mm_loadu_si128((__m128i*)&compress_LUT[hi_msk*16]);
-                const __m128i c = _mm_shuffle_epi8(v, L);
-
-                _mm_storeu_si128((__m128i*)(buffer + ws_count), c);
-                ws_count += hi_cnt;
-            }
-
-            srclen -= 32;
-            src += 32;
-
-            // lower 32 bytes of the buffer are full, pack and save
-            if (ws_count >= 32) {
-                str = dec_reshuffle(_mm256_load_si256((__m256i*)buffer));
-                _mm256_storeu_si256((__m256i*)out, str);
-
-                out += 24;
-                ws_count -= 32;
-
-                // move the high 32 bytes of buffer into the lower part
-                const __m256i tmp = _mm256_load_si256((__m256i*)(buffer + 32));
-                _mm256_store_si256((__m256i*)(buffer), tmp);
-            }
-
-            continue; // !!!
         }
 
-        // no error, but we have leftovers in the buffer
-        if (ws_count > 0) {
-            
-            assert(ws_count <= 32);
+        // 2. decode despaced data
+        for (size_t j=0; j < BUF_SIZE; j += 32) {
+            __m256i str = _mm256_load_si256((__m256i *)(buffer + j));
 
-            // store decoded data at the end of buffer
-            _mm256_storeu_si256((__m256i*)(buffer + ws_count), decoded);
+            // code by @aqrit from
+            // https://github.com/WojciechMula/base64simd/issues/3#issuecomment-271137490
+            // transated into AVX2
+            const __m256i lut_lo = _mm256_setr_epi8(
+                0x15, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 
+                0x11, 0x11, 0x13, 0x1A, 0x1B, 0x1B, 0x1B, 0x1A,
+                0x15, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 
+                0x11, 0x11, 0x13, 0x1A, 0x1B, 0x1B, 0x1B, 0x1A 
+            );
+            const __m256i lut_hi = _mm256_setr_epi8(
+                0x10, 0x10, 0x01, 0x02, 0x04, 0x08, 0x04, 0x08, 
+                0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10,
+                0x10, 0x10, 0x01, 0x02, 0x04, 0x08, 0x04, 0x08, 
+                0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10
+            );
+            const __m256i lut_roll = _mm256_setr_epi8(
+                0,   16,  19,   4, -65, -65, -71, -71,
+                0,   0,   0,   0,   0,   0,   0,   0,
+                0,   16,  19,   4, -65, -65, -71, -71,
+                0,   0,   0,   0,   0,   0,   0,   0
+            );
 
-            // pack 32 lower bytes from the buffer
-            str = dec_reshuffle(_mm256_load_si256((__m256i*)buffer));
-            _mm256_storeu_si256((__m256i*)out, str);
+            const __m256i mask_2F = _mm256_set1_epi8(0x2f);
 
-            srclen -= 32;
-            src += 32;
+            // lookup
+            __m256i hi_nibbles  = _mm256_srli_epi32(str, 4);
+            __m256i lo_nibbles  = _mm256_and_si256(str, mask_2F);
+
+            const __m256i lo    = _mm256_shuffle_epi8(lut_lo, lo_nibbles);
+            const __m256i eq_2F = _mm256_cmpeq_epi8(str, mask_2F);
+
+            hi_nibbles = _mm256_and_si256(hi_nibbles, mask_2F);
+            const __m256i hi    = _mm256_shuffle_epi8(lut_hi, hi_nibbles);
+            const __m256i roll  = _mm256_shuffle_epi8(lut_roll, _mm256_add_epi8(eq_2F, hi_nibbles));
+            const __m256i decoded = _mm256_add_epi8(str, roll);
+
+            if (!_mm256_testz_si256(lo, hi)) {
+                //puts("goto error");
+                goto error;
+            }
+
+            // Reshuffle the input to packed 12-byte output format:
+            str = dec_reshuffle(decoded);
+            _mm256_storeu_si256((__m256i *)out, str);
             out += 24;
-
-            // move the high 32 bytes of buffer into the lower part
-            const __m256i tmp = _mm256_load_si256((__m256i*)(buffer + 32));
-            _mm256_store_si256((__m256i*)(buffer), tmp);
-
-            continue; // !!!
-        }
-
-        srclen -= 32;
-        src += 32;
-
-        // Reshuffle the input to packed 12-byte output format:
-        str = dec_reshuffle(decoded);
-        _mm256_storeu_si256((__m256i *)out, str);
-        out += 24;
       }
 
-      if (ws_count) {
-          // XXX: this is still broken
+      // move tail of buffer to the beginning
+      memcpy(buffer, buffer + BUF_SIZE, pos - BUF_SIZE);
+      pos -= BUF_SIZE;
 
-          char tmp[45 + 32 + 1];
-          for (int i=0; i < ws_count; i++) {
-            // Buffer is already translated, so we're translating it back to ASCII
-            tmp[i] = encode_LUT[buffer[i]];
-          }
-          memcpy(tmp + ws_count, src, srclen);
+    }
 
-          size_t scalarret = chromium_base64_decode(out, tmp, srclen + ws_count);
-          if(scalarret == MODP_B64_ERROR) return MODP_B64_ERROR;
-          return (out - out_orig) + scalarret;
-      } else {
-          size_t scalarret = chromium_base64_decode(out, src, srclen);
-          if(scalarret == MODP_B64_ERROR) return MODP_B64_ERROR;
-          return (out - out_orig) + scalarret;
-      }
+error:
+tail:
+      ;
+      size_t scalarret = chromium_base64_decode(out, before_compress, end - before_compress);
+      if(scalarret == MODP_B64_ERROR) return MODP_B64_ERROR;
+      return (out - out_orig) + scalarret;
 }
