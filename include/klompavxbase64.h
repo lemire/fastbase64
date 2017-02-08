@@ -47,7 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * to *out without trailing zero. Output length in bytes is written to *outlen.
  * The buffer in `out` has been allocated by the caller and is at least 3/4 the
  * size of the input. */
-int avx2_base64_decode
+int klomp_avx2_base64_decode
 	( const char		*src
 	, size_t		 srclen
 	, char			*out
@@ -59,7 +59,7 @@ int avx2_base64_decode
  * to *out without trailing zero. Output length in bytes is written to *outlen.
  * The buffer in `out` has been allocated by the caller and is at least 4/3 the
  * size of the input.  */
-void avx2_base64_encode
+void klomp_avx2_base64_encode
 	( const char		*src
 	, size_t		 srclen
 	, char			*out

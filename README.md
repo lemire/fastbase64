@@ -27,7 +27,7 @@ Encoding with AVX2...
  char* src = ...;
  int srclen = ...; //the length of number of bytes in src
  char* dest = (char*) malloc(chromium_base64_decode_len(srclen));
- int len = expavx2_base64_encode(dest, src, sourcelen); // returns how many bytes were decoded.
+ int len = fast_avx2_base64_encode(dest, src, sourcelen); // returns how many bytes were decoded.
 ```
 
 ### Decoding
@@ -49,7 +49,7 @@ Decoding with AVX2...
 char* src = ...;
 int srclen = ...; // or if you don't know use strlen(src)
 char* dest = (char*) malloc(chromium_base64_encode_len(srclen)); // effectively multiplies by 3/4
-int len = expavx2_base64_decode(dest, src, sourcelen);
+int len = fast_avx2_base64_decode(dest, src, sourcelen);
 if (len == MODP_B64_ERROR) { error }
 ```
 

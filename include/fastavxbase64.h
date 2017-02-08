@@ -18,13 +18,13 @@
 * AVX2 accelerated version of Galbreath's chromium_base64_decode function
 * Usage remains the same, see chromium.h.
 */
-size_t expavx2_base64_decode(char *out, const char *src, size_t srclen);
+size_t fast_avx2_base64_decode(char *out, const char *src, size_t srclen);
 
 /*
 * AVX2 accelerated version of Galbreath's chromium_base64_encode function
 * Usage remains the same, see chromium.h.
 */
-size_t expavx2_base64_encode(char* dest, const char* str, size_t len);
+size_t fast_avx2_base64_encode(char* dest, const char* str, size_t len);
 
 
 

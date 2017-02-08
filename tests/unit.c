@@ -8,8 +8,8 @@
 #include <assert.h>
 
 #include "chromiumbase64.h"
-#include "avxbase64.h"
-#include "experimentalavxbase64.h"
+#include "klompavxbase64.h"
+#include "fastavxbase64.h"
 
 #include "scalarbase64.h"
 
@@ -90,14 +90,14 @@ void avx2_checkExample(const char * source, const char * coded) {
 
   char * dest1 = (char*) malloc(chromium_base64_encode_len(strlen(source)));
 
-  avx2_base64_encode(source, strlen(source),dest1,&codedlen);
+  klomp_avx2_base64_encode(source, strlen(source),dest1,&codedlen);
   assert(strncmp(dest1,coded,codedlen) == 0);
   char *dest2 = (char*) malloc(chromium_base64_decode_len(codedlen));
-  avx2_base64_decode(coded,codedlen,dest2,&len);
+  klomp_avx2_base64_decode(coded,codedlen,dest2,&len);
   assert(len == strlen(source));
   assert(strncmp(dest2,source,strlen(source)) == 0);
   char *dest3 = (char*) malloc(chromium_base64_decode_len(codedlen));
-  avx2_base64_decode(dest1,codedlen,dest3,&len);
+  klomp_avx2_base64_decode(dest1,codedlen,dest3,&len);
   assert(len == strlen(source));
   assert(strncmp(dest3,source,strlen(source)) == 0);
   free(dest1);
@@ -112,14 +112,14 @@ void expavx2_checkExample(const char * source, const char * coded) {
   size_t codedlen;
 
   char * dest1 = (char*) malloc(chromium_base64_encode_len(strlen(source)));
-  codedlen = expavx2_base64_encode(dest1, source, strlen(source));
+  codedlen = fast_avx2_base64_encode(dest1, source, strlen(source));
   assert(strncmp(dest1,coded,codedlen) == 0);
   char *dest2 = (char*) malloc(chromium_base64_decode_len(codedlen));
-  len = expavx2_base64_decode(dest2, coded, codedlen);
+  len = fast_avx2_base64_decode(dest2, coded, codedlen);
   assert(len == strlen(source));
   assert(strncmp(dest2,source,strlen(source)) == 0);
   char *dest3 = (char*) malloc(chromium_base64_decode_len(codedlen));
-  len = expavx2_base64_decode(dest3, dest1, codedlen);
+  len = fast_avx2_base64_decode(dest3, dest1, codedlen);
   assert(len == strlen(source));
   assert(strncmp(dest3,source,strlen(source)) == 0);
   free(dest1);

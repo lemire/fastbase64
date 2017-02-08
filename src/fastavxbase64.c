@@ -1,4 +1,4 @@
-#include "experimentalavxbase64.h"
+#include "fastavxbase64.h"
 
 #include <x86intrin.h>
 #include <stdbool.h>
@@ -17,14 +17,6 @@
 * Note : Hardware such as Knights Landing might do poorly with this AVX2 code since it relies on shuffles. Alternatives might be faster.
 */
 
-
-static inline __m256i _mm256_bswap_epi32(const __m256i in) {
-  // _mm256_shuffle_epi8() works on two 128-bit lanes separately:
-  return _mm256_shuffle_epi8(in, _mm256_setr_epi8(3, 2, 1, 0, 7, 6, 5, 4, 11,
-                                                  10, 9, 8, 15, 14, 13, 12, 3,
-                                                  2, 1, 0, 7, 6, 5, 4, 11, 10,
-                                                  9, 8, 15, 14, 13, 12));
-}
 
 static inline __m256i enc_reshuffle(const __m256i input) {
 
@@ -83,7 +75,7 @@ static inline __m256i dec_reshuffle(__m256i in) {
 }
 
 
-size_t expavx2_base64_encode(char* dest, const char* str, size_t len) {
+size_t fast_avx2_base64_encode(char* dest, const char* str, size_t len) {
       const char* const dest_orig = dest;
       if(len >= 32 - 4) {
         // first load is masked
@@ -123,7 +115,7 @@ size_t expavx2_base64_encode(char* dest, const char* str, size_t len) {
       return (dest - dest_orig) + scalarret;
 }
 
-size_t expavx2_base64_decode(char *out, const char *src, size_t srclen) {
+size_t fast_avx2_base64_decode(char *out, const char *src, size_t srclen) {
       char* out_orig = out;
       while (srclen >= 45) {
 
@@ -145,15 +137,15 @@ size_t expavx2_base64_decode(char *out, const char *src, size_t srclen) {
         // https://github.com/WojciechMula/base64simd/issues/3#issuecomment-271137490
         // transated into AVX2
         const __m256i lut_lo = _mm256_setr_epi8(
-            0x15, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 
+            0x15, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11,
             0x11, 0x11, 0x13, 0x1A, 0x1B, 0x1B, 0x1B, 0x1A,
-            0x15, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 
-            0x11, 0x11, 0x13, 0x1A, 0x1B, 0x1B, 0x1B, 0x1A 
+            0x15, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11,
+            0x11, 0x11, 0x13, 0x1A, 0x1B, 0x1B, 0x1B, 0x1A
         );
         const __m256i lut_hi = _mm256_setr_epi8(
-            0x10, 0x10, 0x01, 0x02, 0x04, 0x08, 0x04, 0x08, 
+            0x10, 0x10, 0x01, 0x02, 0x04, 0x08, 0x04, 0x08,
             0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10,
-            0x10, 0x10, 0x01, 0x02, 0x04, 0x08, 0x04, 0x08, 
+            0x10, 0x10, 0x01, 0x02, 0x04, 0x08, 0x04, 0x08,
             0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10
         );
         const __m256i lut_roll = _mm256_setr_epi8(

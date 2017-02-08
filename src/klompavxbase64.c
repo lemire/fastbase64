@@ -1,4 +1,4 @@
-#include "avxbase64.h"
+#include "klompavxbase64.h"
 
 #include <x86intrin.h>
 
@@ -581,7 +581,7 @@ static int base64_stream_decode(struct base64_state *state, const char *src,
   return base64_stream_decode_avx2(state, src, srclen, out, outlen);
 }
 
-void avx2_base64_encode(const char *src, size_t srclen, char *out, size_t *outlen) {
+void klomp_avx2_base64_encode(const char *src, size_t srclen, char *out, size_t *outlen) {
   size_t s;
   size_t t;
   struct base64_state state;
@@ -599,7 +599,7 @@ void avx2_base64_encode(const char *src, size_t srclen, char *out, size_t *outle
   *outlen = s + t;
 }
 
-int avx2_base64_decode(const char *src, size_t srclen, char *out, size_t *outlen) {
+int klomp_avx2_base64_decode(const char *src, size_t srclen, char *out, size_t *outlen) {
   int ret;
   struct base64_state state;
 
