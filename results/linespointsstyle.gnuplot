@@ -15,15 +15,14 @@ set ytics nomirror
 
 
 
-set style line 1 lt rgb "#A00000" lw 3 pt 1 ps 1
-set style line 2 lt rgb "#00A000" lw 3 pt 5 ps 1
-set style line 3 lt rgb "#5060D0" lw 3 pt 7 ps 1
-set style line 4 lt rgb "#FF1493" lw 3 pt 9 ps 1
-set style line 5 lt rgb "red" lw 3 pt 11 ps 1
-set style line 6 lt rgb "#808000" lw 3 pt 13 ps 1
-set style line 7 lt rgb "#00008B" lw 3 pt 15 ps 1
-set style line 8 lt rgb "#800080" lw 3 pt 21 ps 1
-set style line 9 lt rgb "black" lw 3 pt 63 ps 1
-set style line 10 lt rgb "blue" lw 3 pt 28 ps 1
-set style line 11 lt rgb "violet" lw 3 pt 44 ps 1
-
+set style line 1 lt rgb "#A00000" lw 5 pt 1 ps 1
+set style line 2 lt rgb "#00A000" lw 5 pt 5 ps 1
+set style line 3 lt rgb "#5060D0" lw 5 pt 7 ps 1
+set style line 4 lt rgb "#FF1493" lw 5 pt 9 ps 1
+set style line 5 lt rgb "red" lw 5 pt 11 ps 1
+set style line 6 lt rgb "#808000" lw 5 pt 13 ps 1
+set style line 7 lt rgb "#00008B" lw 5 pt 15 ps 1
+set style line 8 lt rgb "#800080" lw 5 pt 21 ps 1
+set style line 9 lt rgb "black" lw 5 pt 63 ps 1
+set style line 10 lt rgb "blue" lw 5 pt 28 ps 1
+set style line 11 lt rgb "violet" lw 5 pt 44 ps 1
