@@ -83,8 +83,8 @@ void linux_checkExample(const char * source, const char * coded) {
 }
 
 
-void avx2_checkExample(const char * source, const char * coded) {
-  printf("avx2 codec check.\n");
+void klomp_avx2_checkExample(const char * source, const char * coded) {
+  printf("klomp avx2 codec check.\n");
   size_t len;
   size_t codedlen;
 
@@ -106,8 +106,8 @@ void avx2_checkExample(const char * source, const char * coded) {
 }
 
 
-void expavx2_checkExample(const char * source, const char * coded) {
-  printf("experimentalavx2 codec check.\n");
+void fast_avx2_checkExample(const char * source, const char * coded) {
+  printf("fast_avx2 codec check.\n");
   size_t len;
   size_t codedlen;
 
@@ -126,6 +126,34 @@ void expavx2_checkExample(const char * source, const char * coded) {
   free(dest2);
   free(dest3);
 }
+
+static const uint8_t base64_table_enc[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                                   "abcdefghijklmnopqrstuvwxyz"
+                                   "0123456789+/";
+void fast_avx2_checkError() {
+  printf("fast_avx2 codec error check.\n");
+  char source[64];
+  char dest[48];
+  for(unsigned int z = 0; z < 64; ++z) {
+    for(int i = 0; i < 64; ++i) source[i] = base64_table_enc[z];
+    int len = fast_avx2_base64_decode(dest, source, 64);
+    assert(len == 48);
+  }
+  for(int z = 0; z < 256 ; ++z) {
+    bool in_list = false;
+    for(unsigned int zz = 0; zz < 64 ; ++zz)
+      if(base64_table_enc[zz] == z) in_list = true;
+    if(! in_list) {
+      for(int pos = 0; pos < 32; ++pos) {
+        for(int i = 0; i < 64; ++i) source[i] = 'A';
+        source[pos] = z;
+        int len = fast_avx2_base64_decode(dest, source, 64);
+        assert(len == -1);
+      }
+    }
+  }
+}
+
 
 
 void scalar_checkExample(const char * source, const char * coded) {
@@ -154,7 +182,7 @@ void scalar_checkExample(const char * source, const char * coded) {
 
 
 int main() {
-
+  fast_avx2_checkError();
 
   // from Wikipedia page
   const char * wikipediasource = "Man is distinguished, not only by his reason, but by this singular passion from \
@@ -180,13 +208,13 @@ ZSBzaG9ydCB2ZWhlbWVuY2Ugb2YgYW55IGNhcm5hbCBwbGVhc3VyZS4=";
   chromium_checkExample(gosource,gocoded);
   chromium_checkExample(tutosource,tutocoded);
 
-  avx2_checkExample(wikipediasource,wikipediacoded);
-  avx2_checkExample(gosource,gocoded);
-  avx2_checkExample(tutosource,tutocoded);
+  klomp_avx2_checkExample(wikipediasource,wikipediacoded);
+  klomp_avx2_checkExample(gosource,gocoded);
+  klomp_avx2_checkExample(tutosource,tutocoded);
 
-  expavx2_checkExample(wikipediasource,wikipediacoded);
-  expavx2_checkExample(gosource,gocoded);
-  expavx2_checkExample(tutosource,tutocoded);
+  fast_avx2_checkExample(wikipediasource,wikipediacoded);
+  fast_avx2_checkExample(gosource,gocoded);
+  fast_avx2_checkExample(tutosource,tutocoded);
 
   scalar_checkExample(wikipediasource,wikipediacoded);
   scalar_checkExample(gosource,gocoded);
@@ -199,7 +227,6 @@ ZSBzaG9ydCB2ZWhlbWVuY2Ugb2YgYW55IGNhcm5hbCBwbGVhc3VyZS4=";
   linux_checkExample(wikipediasource,wikipediacoded);
   linux_checkExample(gosource,gocoded);
   linux_checkExample(tutosource,tutocoded);
-
 
 	printf("Code looks ok.\n");
   return 0;
