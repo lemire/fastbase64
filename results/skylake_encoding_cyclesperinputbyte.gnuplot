@@ -9,7 +9,7 @@ stats 'skylakeencoding.txt' using 1
 set xrange [STATS_min:STATS_max]
 set ytics 0.5
 set yrange [0:5]
-set key top right
+set key bottom right
 
 plot "skylakeencoding.txt" using 1:2 ti "Linux"  smooth csplines ls 1, \
      "" using 1:3 ti "Apple QuickTime"  smooth csplines  ls 2, \
