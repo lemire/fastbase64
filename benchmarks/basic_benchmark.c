@@ -26,6 +26,7 @@ void testencode(const char * data, size_t datalength, bool verbose) {
   char * buffer = malloc(datalength * 2); // we allocate plenty of memory
   size_t expected =   chromium_base64_encode(buffer, data,  datalength);
   if(verbose) printf("encoded size = %zu \n",expected);
+  BEST_TIME_NOCHECK(memcpy(buffer, data, datalength),  , repeat, datalength,verbose);
   BEST_TIME_NOCHECK(linux_base64_encode(buffer, data, data + datalength),  , repeat, datalength,verbose);
   BEST_TIME_NOCHECK(quicktime_base64_encode(buffer, data,datalength),  , repeat, datalength,verbose);
   BEST_TIME(chromium_base64_encode(buffer, data, datalength), (int) expected, , repeat, datalength,verbose);
@@ -50,7 +51,6 @@ void testdecode(const char * data, size_t datalength, bool verbose) {
   size_t expected =   chromium_base64_decode(buffer, data,  datalength);
   if(verbose) printf("original size = %zu \n",expected);
   BEST_TIME_NOCHECK(memcpy(buffer, data, datalength),  , repeat, datalength,verbose);
- 
   BEST_TIME(linux_base64_decode(buffer, data, data + datalength), (int) expected, , repeat, datalength,verbose);
   BEST_TIME(quicktime_base64_decode(buffer, data), (int) expected, , repeat, datalength,verbose);
   BEST_TIME(chromium_base64_decode(buffer, data, datalength), (int) expected, , repeat, datalength,verbose);
