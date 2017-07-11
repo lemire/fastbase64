@@ -9,9 +9,11 @@ stats 'skylake.txt' using 1
 set xrange [STATS_min:STATS_max]
 set ytics 0.5
 set yrange [0:5]
-set key bottom right
+set key top right box opaque
 
-plot "skylake.txt" using 1:2 ti "Linux"  smooth csplines  ls 1, \
-     "" using 1:3 ti "Apple QuickTime"   smooth csplines  ls 2, \
-     "" using 1:4 ti "Google Chrome"   smooth csplines ls 3, \
-     "" using 1:7 ti "AVX2"   smooth csplines  ls 6
+plot "skylake.txt" using 1:3 ti "Linux"  smooth csplines  ls 1, \
+     "" using 1:4 ti "Apple QuickTime"   smooth csplines  ls 2, \
+     "" using 1:5 ti "Google Chrome"   smooth csplines ls 3, \
+     "" using 1:7 ti "AVX2 (Klomp)"  smooth csplines  ls 5,\
+     "" using 1:8 ti "AVX2"   smooth csplines  ls 6,\
+     "" using 1:2 ti "memcpy"   smooth csplines  ls 7

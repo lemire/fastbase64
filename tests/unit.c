@@ -16,7 +16,14 @@
 #include "quicktimebase64.h"
 #include "linuxbase64.h"
 
-
+void print_example(const char * source) {
+  char * dest1 = (char*) malloc(chromium_base64_encode_len(strlen(source)));
+  unsigned int len = chromium_base64_decode(dest1, source,strlen(source));
+  unsigned int i = 0;
+  for(; i != len; i++) printf("%u ",dest1[i]&0xFF);
+  printf("\n");
+  free(dest1);
+}
 void chromium_checkExample(const char * source, const char * coded) {
   printf("chromium codec check.\n");
   unsigned int len;
@@ -228,6 +235,7 @@ ZSBzaG9ydCB2ZWhlbWVuY2Ugb2YgYW55IGNhcm5hbCBwbGVhc3VyZS4=";
   linux_checkExample(gosource,gocoded);
   linux_checkExample(tutosource,tutocoded);
 
+  print_example("R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=");
 	printf("Code looks ok.\n");
   return 0;
 }
