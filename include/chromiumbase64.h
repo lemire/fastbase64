@@ -141,14 +141,6 @@ size_t chromium_base64_decode(char* dest, const char* src, size_t len);
 
 #include <string>
 
-inline std::string& chromium_base64_encode(std::string& s)
-{
-    std::string x(chromium_base64_encode_len(s.size()), '\0');
-    size_t d = chromium_base64_encode(const_cast<char*>(x.data()), s.data(), (int)s.size());
-    x.erase(d, std::string::npos);
-    s.swap(x);
-    return s;
-}
 
 /**
  * base 64 decode a string (self-modifing)
