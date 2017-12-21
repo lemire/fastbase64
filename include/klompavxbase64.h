@@ -8,6 +8,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 /**
 * This code is based on Alfred Klomp's https://github.com/aklomp/base64 (published under BSD)
@@ -66,5 +69,8 @@ void klomp_avx2_base64_encode
 	, size_t		*outlen
 	) ;
 
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif
