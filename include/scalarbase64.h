@@ -8,6 +8,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 /**
 * We copy the code below from https://github.com/aklomp/base64
@@ -37,5 +40,8 @@ void scalar_base64_encode
 	, size_t		*outlen
 	) ;
 
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif

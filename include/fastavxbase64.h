@@ -9,6 +9,10 @@
 #include <stdint.h>
 #include "chromiumbase64.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 /**
 * This code extends Nick Galbreath's high performance base 64decoder (used in Chromium), the API is the
 * same effectively, see chromium64.h.
@@ -26,6 +30,8 @@ size_t fast_avx2_base64_decode(char *out, const char *src, size_t srclen);
 */
 size_t fast_avx2_base64_encode(char* dest, const char* str, size_t len);
 
-
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif
