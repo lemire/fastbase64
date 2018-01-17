@@ -5,6 +5,8 @@
 
 We are investigating the possibility of SIMD-accelerated base64 codecs.
 
+* Wojciech Muła, Daniel Lemire, Faster Base64 Encoding and Decoding Using AVX2 Instructions, ACM Transactions on the Web (to appear) https://arxiv.org/abs/1704.00605
+
 ## Sample usage
 
 
