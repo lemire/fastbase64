@@ -10,6 +10,9 @@
 #include "chromiumbase64.h"
 #include "klompavxbase64.h"
 #include "fastavxbase64.h"
+#ifdef HAVE_AVX512BW
+#include "fastavx512bwbase64.h"
+#endif
 
 #include "scalarbase64.h"
 
@@ -134,6 +137,29 @@ void fast_avx2_checkExample(const char * source, const char * coded) {
   free(dest3);
 }
 
+#ifdef HAVE_AVX512BW
+void fast_avx512bw_checkExample(const char * source, const char * coded) {
+  printf("fast_avx512bw codec check.\n");
+  size_t len;
+  size_t codedlen;
+
+  char * dest1 = (char*) malloc(chromium_base64_encode_len(strlen(source)));
+  codedlen = fast_avx512bw_base64_encode(dest1, source, strlen(source));
+  assert(strncmp(dest1,coded,codedlen) == 0);
+  char *dest2 = (char*) malloc(chromium_base64_decode_len(codedlen));
+  len = fast_avx512bw_base64_decode(dest2, coded, codedlen);
+  assert(len == strlen(source));
+  assert(strncmp(dest2,source,strlen(source)) == 0);
+  char *dest3 = (char*) malloc(chromium_base64_decode_len(codedlen));
+  len = fast_avx512bw_base64_decode(dest3, dest1, codedlen);
+  assert(len == strlen(source));
+  assert(strncmp(dest3,source,strlen(source)) == 0);
+  free(dest1);
+  free(dest2);
+  free(dest3);
+}
+#endif // HAVE_AVX512BW
+
 static const uint8_t base64_table_enc[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                                    "abcdefghijklmnopqrstuvwxyz"
                                    "0123456789+/";
@@ -222,6 +248,12 @@ ZSBzaG9ydCB2ZWhlbWVuY2Ugb2YgYW55IGNhcm5hbCBwbGVhc3VyZS4=";
   fast_avx2_checkExample(wikipediasource,wikipediacoded);
   fast_avx2_checkExample(gosource,gocoded);
   fast_avx2_checkExample(tutosource,tutocoded);
+
+#ifdef HAVE_AVX512BW
+  fast_avx512bw_checkExample(wikipediasource,wikipediacoded);
+  fast_avx512bw_checkExample(gosource,gocoded);
+  fast_avx512bw_checkExample(tutosource,tutocoded);
+#endif // HAVE_AVX512BW
 
   scalar_checkExample(wikipediasource,wikipediacoded);
   scalar_checkExample(gosource,gocoded);

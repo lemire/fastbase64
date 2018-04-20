@@ -17,6 +17,9 @@
 #include "chromiumbase64.h"
 #include "quicktimebase64.h"
 #include "linuxbase64.h"
+#ifdef HAVE_AVX512BW
+#include "fastavxbase64.h"
+#endif // HAVE_AVX512BW
 
 static const int repeat = 50;
 
@@ -36,6 +39,9 @@ void testencode(const char * data, size_t datalength, bool verbose) {
   assert(outputlength == expected);
   BEST_TIME_CHECK(scalar_base64_encode(data,datalength,buffer,&outputlength),(outputlength == avxexpected), , repeat, datalength,verbose);
   BEST_TIME_CHECK(fast_avx2_base64_encode(buffer, data, datalength), (int) expected, , repeat, datalength,verbose);
+#ifndef HAVE_AVX512BW
+  BEST_TIME_CHECK(fast_avx512bw_base64_encode(buffer, data, datalength), (int) expected, , repeat, datalength,verbose);
+#endif // HAVE_AVX512BW
   free(buffer);
   if(verbose) printf("\n");
 }
@@ -61,6 +67,9 @@ void testdecode(const char * data, size_t datalength, bool verbose) {
   BEST_TIME(scalar_base64_decode(data,datalength,buffer,&outputlength), avxexpected, , repeat, datalength,verbose);
   BEST_TIME(klomp_avx2_base64_decode(data,datalength,buffer,&outputlength), avxexpected, , repeat, datalength,verbose);
   BEST_TIME(fast_avx2_base64_decode(buffer, data, datalength), (int) expected, , repeat, datalength,verbose);
+#ifndef HAVE_AVX512BW
+  BEST_TIME(fast_avx512bw_base64_decode(buffer, data, datalength), (int) expected, , repeat, datalength,verbose);
+#endif // HAVE_AVX512BW
 
   free(buffer);
   if(verbose) printf("\n");

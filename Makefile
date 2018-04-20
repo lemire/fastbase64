@@ -3,12 +3,18 @@
 .PHONY: all clean
 #
 .SUFFIXES: .cpp .o .c .h
-CFLAGS= -fPIC -std=c99 -Wall -Wextra -Wshadow -Wpsabi
+CFLAGS= -fPIC -std=c99 -Wall -Wextra -Wshadow -Wpsabi -Wfatal-errors
 ifeq ($(DEBUG),1)
 CFLAGS += -ggdb -fsanitize=undefined  -fno-omit-frame-pointer -fsanitize=address
 else
-CFLAGS += -O3 -march=native -mavx2
+CFLAGS += -O3 -march=native
 endif # debug
+
+ifeq ($(AVX512BW),1)
+CFLAGS += -march=native -mavx512bw -DHAVE_AVX512BW
+else
+CFLAGS += -march=native -mavx2
+endif # AVX512BW
 
 all: unit basic_benchmark
 
@@ -17,10 +23,12 @@ HEADERS=./include/chromiumbase64.h \
         ./include/klompavxbase64.h \
         ./include/quicktimebase64.h \
         ./include/scalarbase64.h \
-        ./include/fastavxbase64.h
+        ./include/fastavxbase64.h \
+        ./include/fastavx512bwbase64.h \
 
 OBJECTS=chromiumbase64.o \
         fastavxbase64.o \
+        fastavx512bwbase64.o \
         klompavxbase64.o \
         quicktimebase64.o \
         scalarbase64.o 
