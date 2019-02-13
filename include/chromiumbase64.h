@@ -50,7 +50,7 @@ extern "C" {
  * \code
  * char* src = ...;
  * int srclen = ...; //the length of number of bytes in src
- * char* dest = (char*) malloc(chromium_base64_decode_len(srclen));
+ * char* dest = (char*) malloc(chromium_base64_encode_len(srclen));
  * int len = chromium_base64_encode(dest, src, sourcelen);
  * if (len == MODP_B64_ERROR) {
  *   printf("Error\n");
@@ -79,7 +79,7 @@ size_t chromium_base64_encode(char* dest, const char* str, size_t len);
  * \code
  * char* src = ...;
  * int srclen = ...; // or if you don't know use strlen(src)
- * char* dest = (char*) malloc(chromium_base64_encode_len(srclen));
+ * char* dest = (char*) malloc(chromium_base64_decode_len(srclen));
  * int len = chromium_base64_decode(dest, src, sourcelen);
  * if (len == MODP_B64_ERROR) { error }
  * \endcode
