@@ -23,14 +23,14 @@ Original encoding...
 ```
  char* src = ...;
  int srclen = ...; //the length of number of bytes in src
- char* dest = (char*) malloc(chromium_base64_decode_len(srclen)); // decode_len effectively multiplies by 4/3
+ char* dest = (char*) malloc(chromium_base64_encode_len(srclen)); // decode_len effectively multiplies by 4/3
  int len = chromium_base64_encode(dest, src, sourcelen); // returns how many bytes were decoded.
 ```
 Encoding with AVX2...
 ```
  char* src = ...;
  int srclen = ...; //the length of number of bytes in src
- char* dest = (char*) malloc(chromium_base64_decode_len(srclen));
+ char* dest = (char*) malloc(chromium_base64_encode_len(srclen));
  int len = fast_avx2_base64_encode(dest, src, sourcelen); // returns how many bytes were decoded.
 ```
 
@@ -40,7 +40,7 @@ Original decoding...
 ```
 char* src = ...;
 int srclen = ...; // or if you don't know use strlen(src)
-char* dest = (char*) malloc(chromium_base64_encode_len(srclen)); // effectively multiplies by 3/4
+char* dest = (char*) malloc(chromium_base64_decode_len(srclen)); // effectively multiplies by 3/4
 int len = chromium_base64_decode(dest, src, sourcelen);
 if (len == MODP_B64_ERROR) { error }
 ```
@@ -52,7 +52,7 @@ Decoding with AVX2...
 ```
 char* src = ...;
 int srclen = ...; // or if you don't know use strlen(src)
-char* dest = (char*) malloc(chromium_base64_encode_len(srclen)); // effectively multiplies by 3/4
+char* dest = (char*) malloc(chromium_base64_decode_len(srclen)); // effectively multiplies by 3/4
 int len = fast_avx2_base64_decode(dest, src, sourcelen);
 if (len == MODP_B64_ERROR) { error }
 ```
