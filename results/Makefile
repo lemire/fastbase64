@@ -3,7 +3,8 @@ ALL=skylake_decoding_cyclesperinputbyte.pdf \
     skylake_decoding_ratio_cyclesperinputbyte.pdf \
     skylake_encoding_cyclesperinputbyte.pdf \
     skylake_encoding_cyclesperinputbyte.png \
-    skylake_encoding_ratio_cyclesperinputbyte.pdf
+    skylake_encoding_ratio_cyclesperinputbyte.pdf \
+	power9_decoding_nanosecondsperinputbyte.png
 
 all: $(ALL)
 
@@ -24,6 +25,9 @@ skylake_encoding_cyclesperinputbyte.png: skylakeencoding.txt
 
 skylake_encoding_ratio_cyclesperinputbyte.pdf: skylakeencoding.txt
 	gnuplot skylake_encoding_ratio_cyclesperinputbyte.gnuplot
+
+power9_decoding_nanosecondsperinputbyte.png: power9decoding.txt
+	gnuplot power9_decoding_nanosecondsperinputbyte.png.gnuplot
 
 clean:
 	rm -f *.pdf *.png
