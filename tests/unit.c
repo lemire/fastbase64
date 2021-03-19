@@ -193,16 +193,16 @@ void altivec_checkExample(const char *source, const char *coded) {
   size_t len;
   size_t codedlen;
 
-  char *dest1 = (char *)malloc(chromium_base64_encode_len(strlen(source)));
+  char *dest1 = malloc(chromium_base64_encode_len(strlen(source)));
   codedlen = altivec_base64_encode(dest1, source, strlen(source));
   assert(strncmp(dest1, coded, codedlen) == 0);
 
-  char *dest2 = (char *)malloc(chromium_base64_decode_len(codedlen));
+  char *dest2 = malloc(chromium_base64_decode_len(codedlen));
   len = altivec_base64_decode(dest2, coded, codedlen);
   assert(len == strlen(source));
   assert(strncmp(dest2, source, strlen(source)) == 0);
 
-  char *dest3 = (char *)malloc(chromium_base64_decode_len(codedlen));
+  char *dest3 = malloc(chromium_base64_decode_len(codedlen));
   len = altivec_base64_decode(dest3, dest1, codedlen);
   assert(len == strlen(source));
   assert(strncmp(dest3, source, strlen(source)) == 0);
