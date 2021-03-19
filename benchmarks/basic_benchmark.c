@@ -29,7 +29,6 @@
 #endif // ALTIVEC
 
 static const int repeat = 50;
-struct timespec start, end;
 
 void testencode(const char *data, size_t datalength, bool verbose) {
   if (verbose) {
