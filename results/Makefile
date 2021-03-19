@@ -17,5 +17,8 @@ ice_lake_dec: ice_lake_dec.txt
 ice_lake_enc: ice_lake_enc.txt
 	gnuplot -e "filename='ice_lake_enc'" ice_lake.gnuplot
 
+power9_decoding_nanosecondsperinputbyte.png: power9decoding.txt
+	gnuplot power9_decoding_nanosecondsperinputbyte.png.gnuplot
+
 clean:
 	rm -f *.png

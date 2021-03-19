@@ -50,6 +50,8 @@ endif # AltiVec
 %.o: ./src/%.c $(HEADERS)
 	$(CC) $(CFLAGS) -c $< -Iinclude
 
+# basic_benchmark: ./my_benchmark/basic_benchmark.c  ./my_benchmark/benchmark.h  $(HEADERS) $(OBJECTS)
+	# $(CC) $(CFLAGS) -o $@ ./my_benchmark/basic_benchmark.c -Iinclude  $(OBJECTS)
 basic_benchmark: ./benchmarks/basic_benchmark.c  ./benchmarks/benchmark.h  $(HEADERS) $(OBJECTS)
 	$(CC) $(CFLAGS) -o $@ ./benchmarks/basic_benchmark.c -Iinclude  $(OBJECTS)
 
