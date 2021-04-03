@@ -13,13 +13,9 @@ static inline v16i _mm_set1_epi8(char a) {
   return (v16i){a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a};
 }
 
-static inline v16i _mm_set1_epi16(short a) {
-  return (v16i)(v8hi){a, a, a, a, a, a, a, a};
-}
+static inline v16i _mm_set1_epi16(short a) { return (v16i)(v8hi){a, a, a, a, a, a, a, a}; }
 
-static inline v16i _mm_set1_epi32(int a) {
-  return (v16i)(v4si){a, a, a, a};
-}
+static inline v16i _mm_set1_epi32(int a) { return (v16i)(v4si){a, a, a, a}; }
 
 static inline v16i _mm_madd_epi16(v16i a, v16i b) {
   const v4si zero = {0, 0, 0, 0};
@@ -42,11 +38,9 @@ static inline v16i enc_reshuffle(const v16i input) {
 }
 
 static inline v16i enc_translate(const v16i in) {
-  const v16i lut = {65, 71, -4, -4, -4,  -4,  -4, -4,
-                       -4, -4, -4, -4, -19, -16, 0,  0};
+  const v16i lut = {65, 71, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -19, -16, 0, 0};
   v16i indices = vec_subs(in, _mm_set1_epi8(51));
-  const v16i mask =
-      vec_cmpgt((__vector char)in, (__vector char)_mm_set1_epi8(25));
+  const v16i mask = vec_cmpgt((__vector char)in, (__vector char)_mm_set1_epi8(25));
   indices = vec_sub(indices, mask);
   const v16i out = vec_add(in, vec_perm(lut, lut, indices));
   return out;
@@ -54,20 +48,19 @@ static inline v16i enc_translate(const v16i in) {
 
 static inline v16i dec_reshuffle(v16i in) {
   const v16i mask = _mm_set1_epi16(0x3f);
-
-  const v16i only_c_and_a = vec_and(in, mask);
-  const v16i only_c_and_a_shifted =
-      vec_sl((v8hu)only_c_and_a, (v8hu)_mm_set1_epi16(6));
-
+  // for each 4 bytes [00dddddd|00cccccc|00bbbbbb|00aaaaaa] we do:
+  // [00000000|00cccccc|00000000|00aaaaaa]
+  const v16i c_and_a = vec_and(in, mask);
+  // [0000cccc|cc000000|0000aaaa|aa000000]
+  const v16i c_and_a_shifted = vec_sl((v8hu)c_and_a, (v8hu)_mm_set1_epi16(6));
+  // [00000000|00dddddd|00000000|00bbbbbb]
   const v16i d_and_b_shifted = vec_sr((v8hu)in, (v8hu)_mm_set1_epi16(8));
-  const v16i only_d_and_b_shifted = vec_and(d_and_b_shifted, mask);
-
-  const v16i cd_and_ab = vec_or(only_c_and_a_shifted, only_d_and_b_shifted);
-
+  // [0000cccc|ccdddddd|0000aaaa|aabbbbbb]
+  const v16i cd_and_ab = vec_or(c_and_a_shifted, d_and_b_shifted);
+  // [00000000|aaaaaabb|bbbbcccc|ccdddddd]
   const v16i abcd = _mm_madd_epi16(cd_and_ab, _mm_set1_epi32(0x00011000));
-  return vec_perm(
-      abcd, abcd,
-      (v16i){2, 1, 0, 6, 5, 4, 10, 9, 8, 14, 13, 12, -1, -1, -1, -1});
+  // [4 zero bytes|next 3 bytes|next 3 bytes|next 3 bytes|ddddddcc|ccccbbbb|bbaaaaaa]
+  return vec_perm(abcd, abcd, (v16i){2, 1, 0, 6, 5, 4, 10, 9, 8, 14, 13, 12, -1, -1, -1, -1});
 }
 
 size_t altivec_base64_encode(char *dest, const char *str, size_t len) {
@@ -117,11 +110,10 @@ size_t altivec_base64_decode(char *out, const char *src, size_t srclen) {
     // https://github.com/WojciechMula/base64simd/issues/3#issuecomment-271137490
     // transated into AltiVec
     const v16i lut_lo = {0x15, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11,
-                            0x11, 0x11, 0x13, 0x1A, 0x1B, 0x1B, 0x1B, 0x1A};
+                         0x11, 0x11, 0x13, 0x1A, 0x1B, 0x1B, 0x1B, 0x1A};
     const v16i lut_hi = {0x10, 0x10, 0x01, 0x02, 0x04, 0x08, 0x04, 0x08,
-                            0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10};
-    const v16i lut_roll = {0, 16, 19, 4, -65, -65, -71, -71,
-                              0, 0,  0,  0, 0,   0,   0,   0};
+                         0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10};
+    const v16i lut_roll = {0, 16, 19, 4, -65, -65, -71, -71, 0, 0, 0, 0, 0, 0, 0, 0};
     const v16i mask_2F = _mm_set1_epi8(0x2f);
     // lookup
     v16i hi_nibbles = vec_sr((v4su)str, vec_splat_u32(4));
@@ -130,8 +122,7 @@ size_t altivec_base64_decode(char *out, const char *src, size_t srclen) {
     const v16i eq_2F = vec_cmpeq(str, mask_2F);
     hi_nibbles = vec_and(hi_nibbles, mask_2F);
     const v16i hi = vec_perm(lut_hi, lut_hi, hi_nibbles);
-    const v16i roll =
-        vec_perm(lut_roll, lut_roll, vec_add(eq_2F, hi_nibbles));
+    const v16i roll = vec_perm(lut_roll, lut_roll, vec_add(eq_2F, hi_nibbles));
 
     if (vec_any_ne(vec_and(lo, hi), _mm_set1_epi8(0))) {
       break;
