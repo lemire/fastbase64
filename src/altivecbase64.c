@@ -13,9 +13,13 @@ static inline v16i _mm_set1_epi8(char a) {
   return (v16i){a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a};
 }
 
-static inline v16i _mm_set1_epi16(short a) { return (v16i)(v8hi){a, a, a, a, a, a, a, a}; }
+static inline v16i _mm_set1_epi16(short a) { 
+  return (v16i)(v8hi){a, a, a, a, a, a, a, a};
+}
 
-static inline v16i _mm_set1_epi32(int a) { return (v16i)(v4si){a, a, a, a}; }
+static inline v16i _mm_set1_epi32(int a) { 
+  return (v16i)(v4si){a, a, a, a};
+}
 
 static inline v16i _mm_madd_epi16(v16i a, v16i b) {
   const v4si zero = {0, 0, 0, 0};
@@ -23,9 +27,7 @@ static inline v16i _mm_madd_epi16(v16i a, v16i b) {
 }
 
 static inline v16i enc_reshuffle(const v16i input) {
-  const v16i perm_mask = {
-      1, 0, 2, 1, 4, 3, 5, 4, 7, 6, 8, 7, 10, 9, 11, 10,
-  };
+  const v16i perm_mask = {1, 0, 2, 1, 4, 3, 5, 4, 7, 6, 8, 7, 10, 9, 11, 10};
   const v16i in = vec_perm(input, input, perm_mask);
 
   const v16i t0 = vec_and(in, (v16i)_mm_set1_epi32(0x0fc0fc00));
