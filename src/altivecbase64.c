@@ -3,71 +3,69 @@
 #include <altivec.h>
 #include <stdbool.h>
 
-typedef __attribute__((__aligned__(16), __may_alias__)) vector unsigned char v16i;
-typedef __vector short v8hi;
-typedef __vector unsigned short v8hu;
-typedef __vector int v4si;
-typedef __vector unsigned int v4su;
+typedef __attribute__((__aligned__(16), __may_alias__)) vector unsigned char uint8x16;
+typedef __vector unsigned short uint16x8;
+typedef __vector unsigned int uint32x4;
 
-static inline v16i _mm_set1_epi8(char a) {
-  return (v16i){a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a};
+static inline uint8x16 set1_uint8x16(unsigned char a) {
+  return (uint8x16){a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a};
 }
 
-static inline v16i _mm_set1_epi16(short a) { 
-  return (v16i)(v8hi){a, a, a, a, a, a, a, a};
+static inline uint8x16 set1_uint16x8(unsigned short a) { 
+  return (uint8x16)(uint16x8){a, a, a, a, a, a, a, a};
 }
 
-static inline v16i _mm_set1_epi32(int a) { 
-  return (v16i)(v4si){a, a, a, a};
+static inline uint8x16 set1_uint32x4(int a) { 
+  return (uint8x16)(uint32x4){a, a, a, a};
 }
 
-static inline v16i _mm_madd_epi16(v16i a, v16i b) {
-  const v4si zero = {0, 0, 0, 0};
-  return (v16i)vec_vmsumshm((v8hi)a, (v8hi)b, zero);
+static inline uint8x16 madd_uint8x16(uint8x16 a, uint8x16 b) {
+  const uint32x4 zero = {0, 0, 0, 0};
+  return (uint8x16)vec_vmsumuhm((uint16x8)a, (uint16x8)b, zero);
 }
 
-static inline v16i enc_reshuffle(const v16i input) {
-  const v16i perm_mask = {1, 0, 2, 1, 4, 3, 5, 4, 7, 6, 8, 7, 10, 9, 11, 10};
-  const v16i in = vec_perm(input, input, perm_mask);
+static inline uint8x16 enc_reshuffle(const uint8x16 input) {
+  const uint8x16 perm_mask = {1, 0, 2, 1, 4, 3, 5, 4, 7, 6, 8, 7, 10, 9, 11, 10};
+  const uint8x16 in = vec_perm(input, input, perm_mask);
 
-  const v16i t0 = vec_and(in, (v16i)_mm_set1_epi32(0x0fc0fc00));
-  const v16i t1 = vec_sr((v8hu)t0, (v8hu)_mm_set1_epi32(0x6000a));
+  const uint8x16 t0 = vec_and(in, (uint8x16)set1_uint32x4(0x0fc0fc00));
+  const uint8x16 t1 = vec_sr((uint16x8)t0, (uint16x8)set1_uint32x4(0x6000a));
 
-  const v16i t2 = vec_and(in, (v16i)_mm_set1_epi32(0x003f03f0));
-  const v16i t3 = vec_sl((v8hu)t2, (v8hu)_mm_set1_epi32(0x80004));
+  const uint8x16 t2 = vec_and(in, (uint8x16)set1_uint32x4(0x003f03f0));
+  const uint8x16 t3 = vec_sl((uint16x8)t2, (uint16x8)set1_uint32x4(0x80004));
 
   return vec_or(t1, t3);
 }
 
-static inline v16i enc_translate(const v16i in) {
-  const v16i lut = {65, 71, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -19, -16, 0, 0};
-  v16i indices = vec_subs(in, _mm_set1_epi8(51));
-  const v16i mask = vec_cmpgt((__vector char)in, (__vector char)_mm_set1_epi8(25));
+static inline uint8x16 enc_translate(const uint8x16 in) {
+  const uint8x16 lut = {65, 71, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -19, -16, 0, 0};
+  uint8x16 indices = vec_subs(in, set1_uint8x16(51));
+  const uint8x16 mask = vec_cmpgt((__vector char)in, (__vector char)set1_uint8x16(25));
   indices = vec_sub(indices, mask);
-  const v16i out = vec_add(in, vec_perm(lut, lut, indices));
+  const uint8x16 out = vec_add(in, vec_perm(lut, lut, indices));
   return out;
 }
 
-static inline v16i dec_reshuffle(v16i in) {
-  const v16i mask = _mm_set1_epi16(0x3f);
+static inline uint8x16 dec_reshuffle(uint8x16 in) {
+  const uint8x16 mask = set1_uint16x8(0x3f);
   // for each 4 bytes [00dddddd|00cccccc|00bbbbbb|00aaaaaa] we do:
   // [00000000|00cccccc|00000000|00aaaaaa]
-  const v16i c_and_a = vec_and(in, mask);
+  const uint8x16 c_and_a = vec_and(in, mask);
   // [0000cccc|cc000000|0000aaaa|aa000000]
-  const v16i c_and_a_shifted = vec_sl((v8hu)c_and_a, (v8hu)_mm_set1_epi16(6));
+  const uint8x16 c_and_a_shifted = vec_sl((uint16x8)c_and_a, (uint16x8)set1_uint16x8(6));
   // [00000000|00dddddd|00000000|00bbbbbb]
-  const v16i d_and_b_shifted = vec_sr((v8hu)in, (v8hu)_mm_set1_epi16(8));
+  const uint8x16 d_and_b_shifted = vec_sr((uint16x8)in, (uint16x8)set1_uint16x8(8));
   // [0000cccc|ccdddddd|0000aaaa|aabbbbbb]
-  const v16i cd_and_ab = vec_or(c_and_a_shifted, d_and_b_shifted);
+  const uint8x16 cd_and_ab = vec_or(c_and_a_shifted, d_and_b_shifted);
   // [00000000|aaaaaabb|bbbbcccc|ccdddddd]
-  const v16i abcd = _mm_madd_epi16(cd_and_ab, _mm_set1_epi32(0x00011000));
+  const uint8x16 abcd = madd_uint8x16(cd_and_ab, set1_uint32x4(0x00011000));
   // [4 zero bytes|next 3 bytes|next 3 bytes|next 3 bytes|ddddddcc|ccccbbbb|bbaaaaaa]
-  return vec_perm(abcd, abcd, (v16i){2, 1, 0, 6, 5, 4, 10, 9, 8, 14, 13, 12, -1, -1, -1, -1});
+  return vec_perm(abcd, abcd, (uint8x16){2, 1, 0, 6, 5, 4, 10, 9, 8, 14, 13, 12, -1, -1, -1, -1});
 }
 
 size_t altivec_base64_encode(char *dest, const char *str, size_t len) {
   const char *const dest_orig = dest;
-  v16i inputvector;
+  uint8x16 inputvector;
   // pick off 12 bytes at a time for as long as we can.
   // But because we read 16 bytes at a time, ensure we have enough room to
   // do a full 16-byte read without segfaulting:
@@ -75,7 +73,7 @@ size_t altivec_base64_encode(char *dest, const char *str, size_t len) {
     inputvector = vec_vsx_ld(0, (signed int const *)str);
     inputvector = enc_reshuffle(inputvector);
     inputvector = enc_translate(inputvector);
-    vec_vsx_st(inputvector, 0, (v16i *)dest);
+    vec_vsx_st(inputvector, 0, (uint8x16 *)dest);
     dest += 16;
     str += 12;
     len -= 12;
@@ -106,27 +104,27 @@ size_t altivec_base64_decode(char *out, const char *src, size_t srclen) {
     //  5  [97..122]  [26..51]  -71  a..z
     // (6) Everything else => invalid input
 
-    v16i str = vec_vsx_ld(0, (signed int const *)src);
+    uint8x16 str = vec_vsx_ld(0, (signed int const *)src);
 
     // code by @aqrit from
     // https://github.com/WojciechMula/base64simd/issues/3#issuecomment-271137490
     // transated into AltiVec
-    const v16i lut_lo = {0x15, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11,
+    const uint8x16 lut_lo = {0x15, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11,
                          0x11, 0x11, 0x13, 0x1A, 0x1B, 0x1B, 0x1B, 0x1A};
-    const v16i lut_hi = {0x10, 0x10, 0x01, 0x02, 0x04, 0x08, 0x04, 0x08,
+    const uint8x16 lut_hi = {0x10, 0x10, 0x01, 0x02, 0x04, 0x08, 0x04, 0x08,
                          0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10};
-    const v16i lut_roll = {0, 16, 19, 4, -65, -65, -71, -71, 0, 0, 0, 0, 0, 0, 0, 0};
-    const v16i mask_2F = _mm_set1_epi8(0x2f);
+    const uint8x16 lut_roll = {0, 16, 19, 4, -65, -65, -71, -71, 0, 0, 0, 0, 0, 0, 0, 0};
+    const uint8x16 mask_2F = set1_uint8x16(0x2f);
     // lookup
-    v16i hi_nibbles = vec_sr((v4su)str, vec_splat_u32(4));
-    v16i lo_nibbles = vec_and(str, mask_2F);
-    const v16i lo = vec_perm(lut_lo, lut_lo, lo_nibbles);
-    const v16i eq_2F = vec_cmpeq(str, mask_2F);
+    uint8x16 hi_nibbles = vec_sr((uint32x4)str, vec_splat_u32(4));
+    uint8x16 lo_nibbles = vec_and(str, mask_2F);
+    const uint8x16 lo = vec_perm(lut_lo, lut_lo, lo_nibbles);
+    const uint8x16 eq_2F = vec_cmpeq(str, mask_2F);
     hi_nibbles = vec_and(hi_nibbles, mask_2F);
-    const v16i hi = vec_perm(lut_hi, lut_hi, hi_nibbles);
-    const v16i roll = vec_perm(lut_roll, lut_roll, vec_add(eq_2F, hi_nibbles));
+    const uint8x16 hi = vec_perm(lut_hi, lut_hi, hi_nibbles);
+    const uint8x16 roll = vec_perm(lut_roll, lut_roll, vec_add(eq_2F, hi_nibbles));
 
-    if (vec_any_ne(vec_and(lo, hi), _mm_set1_epi8(0))) {
+    if (vec_any_ne(vec_and(lo, hi), set1_uint8x16(0))) {
       break;
     }
 
@@ -139,7 +137,7 @@ size_t altivec_base64_decode(char *out, const char *src, size_t srclen) {
 
     // Reshuffle the input to packed 12-byte output format:
     str = dec_reshuffle(str);
-    vec_vsx_st(str, 0, (v16i *)out);
+    vec_vsx_st(str, 0, (uint8x16 *)out);
     out += 12;
   }
   size_t scalarret = chromium_base64_decode(out, src, srclen);
