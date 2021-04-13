@@ -112,7 +112,7 @@ size_t fast_avx512bw_base64_encode(char* dest, const char* str, size_t len) {
 
 size_t fast_avx512bw_base64_decode(char *out, const char *src, size_t srclen) {
   char* out_orig = out;
-  while (srclen >= 64) {
+  while (srclen >= 88) {
 
     // load
     const __m512i input = _mm512_loadu_si512((const __m512i*)(src));
