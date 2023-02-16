@@ -56,5 +56,8 @@ basic_benchmark: ./benchmarks/basic_benchmark.c  ./benchmarks/benchmark.h  $(HEA
 unit: ./tests/unit.c  $(HEADERS) $(OBJECTS)
 	$(CC) $(CFLAGS) -o unit ./tests/unit.c -Iinclude  $(OBJECTS)
 
+libfastbase64.so: $(OBJECTS)
+	$(CC) $(CFLAGS) -o libfastbase64.so $(OBJECTS) -shared
+
 clean:
 	rm -f unit basic_benchmark *.o
