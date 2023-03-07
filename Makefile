@@ -59,5 +59,9 @@ unit: ./tests/unit.c  $(HEADERS) $(OBJECTS)
 libfastbase64.so: $(OBJECTS)
 	$(CC) $(CFLAGS) -o libfastbase64.so $(OBJECTS) -shared
 
+libfastbase64.a: $(OBJECTS)
+	ar -qcs $@ $(OBJECTS)
+	ranlib  $@
+
 clean:
 	rm -f unit basic_benchmark *.o
