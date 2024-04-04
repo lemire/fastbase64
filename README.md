@@ -1,6 +1,6 @@
 # fastbase64
 
-**This is an unmaintained  software package that was used for research purposes. Do not use in production. [Use the simdutf library instead](https://github.com/simdutf/simdutf).**
+**This is an unmaintained  software package that was used for research purposes. Do not use in production. [Use the simdutf library instead](https://github.com/simdutf/simdutf).** The simdutf library has superior support for base64.
 
 ## Story
 
